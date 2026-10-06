@@ -900,23 +900,25 @@ function renderAnniversaries() {
         const db = getNextAnniversaryDate(b);
         return da - db;
     });
-    // 更新首页 together-badge 下方的最近纪念日
+    // 更新首页 together-badge 下方的最近纪念日（只显示未来的，不显示已过去）
     const nearestEl = document.getElementById('nearest-anni');
-    if (nearestEl && sorted.length > 0) {
-        const nearest = sorted[0];
-        const target = getNextAnniversaryDate(nearest);
-        const diff = Math.ceil((target - today) / 86400000);
-        if (diff === 0) {
-            nearestEl.textContent = `🎉 今天就是 ${nearest.name}！`;
-        } else if (diff > 0) {
-            nearestEl.textContent = `📅 ${nearest.name} 还有 ${diff} 天`;
-        } else if (!nearest.repeat) {
-            nearestEl.textContent = `✅ ${nearest.name} 已过去`;
+    if (nearestEl) {
+        const future = sorted.find(anni => {
+            const t = getNextAnniversaryDate(anni);
+            const d = Math.ceil((t - today) / 86400000);
+            return d >= 0;
+        });
+        if (future) {
+            const target = getNextAnniversaryDate(future);
+            const diff = Math.ceil((target - today) / 86400000);
+            if (diff === 0) {
+                nearestEl.textContent = `🎉 今天就是 ${future.name}！`;
+            } else {
+                nearestEl.textContent = `📅 ${future.name} 还有 ${diff} 天`;
+            }
         } else {
-            nearestEl.textContent = `📅 ${nearest.name} 还有 ${Math.abs(diff)} 天`;
+            nearestEl.textContent = '';
         }
-    } else if (nearestEl) {
-        nearestEl.textContent = '';
     }
     sorted.forEach(anni => {
         const target = getNextAnniversaryDate(anni);
