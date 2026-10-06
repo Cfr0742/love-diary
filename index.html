@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -6,145 +6,146 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>💕 我们的纪念册</title>
+    <title>馃挄 鎴戜滑鐨勭邯蹇靛唽</title>
     <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
 
-<!-- ========== 封面页（粒子爱心） ========== -->
+<!-- ========== 灏侀潰椤碉紙绮掑瓙鐖卞績锛?========== -->
 <div id="cover-screen" class="screen active">
     <canvas id="heart-canvas"></canvas>
     <div class="cover-content">
-        <h1 id="cover-title" contenteditable="true">💕 我们的纪念册</h1>
-        <p class="cover-subtitle">点击标题可以修改文字哦~</p>
-        <button class="enter-btn" onclick="enterMain()">✨ 进入我们的纪念册 ✨</button>
+        <h1 id="cover-title" contenteditable="true">馃挄 鎴戜滑鐨勭邯蹇靛唽</h1>
+        <p class="cover-subtitle">鐐瑰嚮鏍囬鍙互淇敼鏂囧瓧鍝</p>
+        <button class="enter-btn" onclick="enterMain()">鉁?杩涘叆鎴戜滑鐨勭邯蹇靛唽 鉁?/button>
     </div>
 </div>
 
-<!-- ========== 密码页 ========== -->
+<!-- ========== 瀵嗙爜椤?========== -->
 <div id="password-screen" class="screen">
     <div class="password-box">
-        <h2>🔒 这是属于我们的小秘密</h2>
-        <input type="password" id="password-input" placeholder="请输入密码">
-        <button onclick="checkPassword()">进入</button>
-        <p class="hint">忘记密码？清除浏览器数据即可~</p>
+        <h2>馃敀 杩欐槸灞炰簬鎴戜滑鐨勫皬绉樺瘑</h2>
+        <input type="password" id="password-input" placeholder="璇疯緭鍏ュ瘑鐮?>
+        <button onclick="checkPassword()">杩涘叆</button>
+        <p class="hint">蹇樿瀵嗙爜锛熸竻闄ゆ祻瑙堝櫒鏁版嵁鍗冲彲~</p>
     </div>
 </div>
 
-<!-- ========== 主页面（照片相册风） ========== -->
+<!-- ========== 涓婚〉闈紙鐓х墖鐩稿唽椋庯級 ========== -->
 <div id="main-screen" class="screen">
 
-    <!-- 顶部标题区 -->
+    <!-- 椤堕儴鏍囬鍖?-->
     <header class="main-header">
-        <h1 id="main-title" contenteditable="true">💕 我们的纪念册</h1>
-        <p id="opening-words" contenteditable="true">这是我们的故事，从此刻开始记录...</p>
+        <h1 id="main-title" contenteditable="true">馃挄 鎴戜滑鐨勭邯蹇靛唽</h1>
+        <p id="opening-words" contenteditable="true">杩欐槸鎴戜滑鐨勬晠浜嬶紝浠庢鍒诲紑濮嬭褰?..</p>
         <div class="together-badge">
-            我们在一起已经 <span id="together-days">0</span> 天啦
+            鎴戜滑鍦ㄤ竴璧峰凡缁?<span id="together-days">0</span> 澶╁暒
         </div>
     </header>
 
     <div class="main-container">
 
-        <!-- 纪念日 -->
+        <!-- 绾康鏃?-->
         <section class="album-card">
-            <h2>🎂 纪念日</h2>
+            <h2>馃巶 绾康鏃?/h2>
             <div class="input-row">
-                <input type="text" id="anni-name" placeholder="纪念日名称">
+                <input type="text" id="anni-name" placeholder="绾康鏃ュ悕绉?>
                 <input type="date" id="anni-date">
-                <button onclick="addAnniversary()">添加</button>
+                <button onclick="addAnniversary()">娣诲姞</button>
             </div>
             <div id="anniversary-list" class="card-list"></div>
         </section>
 
-        <!-- 日常记录 -->
+        <!-- 鏃ュ父璁板綍 -->
         <section class="album-card">
-            <h2>📝 情侣日常</h2>
+            <h2>馃摑 鎯呬荆鏃ュ父</h2>
             <div class="input-row">
                 <input type="date" id="daily-date">
-                <input type="text" id="daily-content" placeholder="今天一起做了什么？">
+                <input type="text" id="daily-content" placeholder="浠婂ぉ涓€璧峰仛浜嗕粈涔堬紵">
                 <select id="daily-mood">
-                    <option value="😊">😊 开心</option>
-                    <option value="😘">😘 甜蜜</option>
-                    <option value="🥰">🥰 幸福</option>
-                    <option value="😎">😎 酷</option>
-                    <option value="🤗">🤗 温暖</option>
-                    <option value="😋">😋 好吃</option>
-                    <option value="🥳">🥳 庆祝</option>
+                    <option value="馃槉">馃槉 寮€蹇?/option>
+                    <option value="馃槝">馃槝 鐢滆湝</option>
+                    <option value="馃グ">馃グ 骞哥</option>
+                    <option value="馃槑">馃槑 閰?/option>
+                    <option value="馃">馃 娓╂殩</option>
+                    <option value="馃構">馃構 濂藉悆</option>
+                    <option value="馃コ">馃コ 搴嗙</option>
                 </select>
-                <button onclick="addDaily()">记录</button>
+                <button onclick="addDaily()">璁板綍</button>
             </div>
             <div id="daily-list" class="card-list timeline"></div>
         </section>
 
-        <!-- 照片墙 -->
+        <!-- 鐓х墖澧?-->
         <section class="album-card">
-            <h2>📷 照片墙</h2>
+            <h2>馃摲 鐓х墖澧?/h2>
             <div class="input-row">
-                <input type="text" id="photo-url" placeholder="粘贴图片链接（或点击右侧上传）">
+                <input type="text" id="photo-url" placeholder="绮樿创鍥剧墖閾炬帴锛堟垨鐐瑰嚮鍙充晶涓婁紶锛?>
                 <input type="file" id="photo-file" accept="image/*" onchange="uploadPhoto(this)">
-                <button onclick="document.getElementById('photo-file').click()">📁 上传本地图</button>
-                <button onclick="addPhotoUrl()">添加链接</button>
+                <button onclick="document.getElementById('photo-file').click()">馃搧 涓婁紶鏈湴鍥?/button>
+                <button onclick="addPhotoUrl()">娣诲姞閾炬帴</button>
             </div>
-            <p class="tip">💡 建议先用微博/小红书/QQ空间传图，复制图片链接贴进来，这样不占用空间</p>
+            <p class="tip">馃挕 寤鸿鍏堢敤寰崥/灏忕孩涔?QQ绌洪棿浼犲浘锛屽鍒跺浘鐗囬摼鎺ヨ创杩涙潵锛岃繖鏍蜂笉鍗犵敤绌洪棿</p>
             <div id="photo-grid" class="photo-grid"></div>
         </section>
 
-        <!-- 留言板 -->
+        <!-- 鐣欒█鏉?-->
         <section class="album-card">
-            <h2>💌 悄悄话</h2>
+            <h2>馃拰 鎮勬倓璇?/h2>
             <div class="input-row">
-                <input type="text" id="msg-author" placeholder="署名（如：宝贝）">
-                <input type="text" id="msg-content" placeholder="想对TA说点什么...">
-                <button onclick="addMessage()">留言</button>
+                <input type="text" id="msg-author" placeholder="缃插悕锛堝锛氬疂璐濓級">
+                <input type="text" id="msg-content" placeholder="鎯冲TA璇寸偣浠€涔?..">
+                <button onclick="addMessage()">鐣欒█</button>
             </div>
             <div id="message-list" class="card-list message-list"></div>
         </section>
 
-        <!-- 日历 -->
+        <!-- 鏃ュ巻 -->
         <section class="album-card">
-            <h2>📅 恋爱日历</h2>
+            <h2>馃搮 鎭嬬埍鏃ュ巻</h2>
             <div class="calendar-nav">
-                <button onclick="changeMonth(-1)">◀</button>
-                <span id="calendar-title">2024年1月</span>
-                <button onclick="changeMonth(1)">▶</button>
+                <button onclick="changeMonth(-1)">鈼€</button>
+                <span id="calendar-title">2024骞?鏈?/span>
+                <button onclick="changeMonth(1)">鈻?/button>
             </div>
             <div class="calendar-grid" id="calendar-grid"></div>
         </section>
 
-        <!-- 底部工具栏 -->
+        <!-- 搴曢儴宸ュ叿鏍?-->
         <section class="album-card settings-card">
-            <h2>⚙️ 设置 & 分享</h2>
+            <h2>鈿欙笍 璁剧疆 & 鍒嗕韩</h2>
 
             <div class="setting-item">
-                <label>在一起起始日期：</label>
-                <input type="text" id="start-date" placeholder="例如：2004-05-20" onchange="updateStartDate()">
+                <label>鍦ㄤ竴璧疯捣濮嬫棩鏈燂細</label>
+                <input type="text" id="start-date" placeholder="渚嬪锛?004-05-20" onchange="updateStartDate()">
             </div>
 
             <div class="setting-item">
-                <label>页面密码（留空则不需要）：</label>
-                <input type="text" id="set-password" placeholder="设置密码" onchange="updatePassword()">
+                <label>椤甸潰瀵嗙爜锛堢暀绌哄垯涓嶉渶瑕侊級锛?/label>
+                <input type="text" id="set-password" placeholder="璁剧疆瀵嗙爜" onchange="updatePassword()">
             </div>
 
             <div class="setting-item">
-                <label>背景音乐链接（MP3地址）：</label>
+                <label>鑳屾櫙闊充箰閾炬帴锛圡P3鍦板潃锛夛細</label>
                 <input type="text" id="music-url" placeholder="https://...mp3" onchange="updateMusic()">
                 <audio id="bg-music" loop></audio>
-                <button onclick="toggleMusic()" id="music-btn">🎵 播放/暂停</button>
+                <button onclick="toggleMusic()" id="music-btn">馃幍 鎾斁/鏆傚仠</button>
             </div>
 
             <div class="setting-item share-box">
-                <button onclick="generateShareLink()" class="share-btn">🔗 生成分享链接发给TA</button>
-                <input type="text" id="share-link" readonly placeholder="点击按钮生成链接">
+                <button onclick="generateShareLink()" class="share-btn">馃敆 鐢熸垚鍒嗕韩閾炬帴鍙戠粰TA</button>
+                <input type="text" id="share-link" readonly placeholder="鐐瑰嚮鎸夐挳鐢熸垚閾炬帴">
             </div>
         </section>
 
     </div>
 
     <footer class="main-footer">
-        <p>💕 属于我们的纪念册 · 点击任意标题/文字都可以修改哦</p>
+        <p>馃挄 灞炰簬鎴戜滑鐨勭邯蹇靛唽 路 鐐瑰嚮浠绘剰鏍囬/鏂囧瓧閮藉彲浠ヤ慨鏀瑰摝</p>
     </footer>
 </div>
 
-<script src="app.js?v=2"></script>
+<script src="app.v2.js"></script>
 </body>
 </html>
+
