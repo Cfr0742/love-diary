@@ -1,0 +1,636 @@
+/* ========== 基础重置 ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", sans-serif;
+    background: #faf8f5;
+    color: #444;
+    line-height: 1.6;
+}
+
+/* ========== 页面切换 ========== */
+.screen {
+    display: none;
+    min-height: 100vh;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* ========== 封面页（粒子爱心） ========== */
+#cover-screen {
+    position: relative;
+    background: #0a0a0a;
+    overflow: hidden;
+}
+
+#heart-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.cover-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    padding: 20px;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%);
+}
+
+#cover-title {
+    font-size: 2.8rem;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255, 105, 180, 0.6), 0 0 40px rgba(255, 105, 180, 0.3);
+    margin-bottom: 12px;
+    outline: none;
+    border-bottom: 2px dashed transparent;
+    transition: border-color 0.3s;
+    max-width: 90vw;
+    word-break: break-word;
+}
+
+#cover-title:hover,
+#cover-title:focus {
+    border-bottom-color: rgba(255, 105, 180, 0.5);
+}
+
+.cover-subtitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+    margin-bottom: 40px;
+}
+
+.enter-btn {
+    padding: 14px 36px;
+    font-size: 1.1rem;
+    color: #fff;
+    background: linear-gradient(135deg, #ff6b9d 0%, #ff8e8e 100%);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4);
+    transition: all 0.3s ease;
+}
+
+.enter-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 30px rgba(255, 107, 157, 0.6);
+}
+
+/* ========== 密码页 ========== */
+#password-screen {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ffeef8 0%, #ffe0ec 100%);
+}
+
+#password-screen.active {
+    display: flex;
+}
+
+.password-box {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    text-align: center;
+    max-width: 360px;
+    width: 90%;
+}
+
+.password-box h2 {
+    color: #e91e63;
+    margin-bottom: 24px;
+}
+
+.password-box input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #f8bbd0;
+    border-radius: 12px;
+    font-size: 1rem;
+    margin-bottom: 16px;
+    outline: none;
+}
+
+.password-box input:focus {
+    border-color: #e91e63;
+}
+
+.password-box button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #ff6b9d 0%, #ff8e8e 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.password-box .hint {
+    margin-top: 16px;
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+/* ========== 主页面头部 ========== */
+.main-header {
+    background: linear-gradient(135deg, #fff0f5 0%, #ffe4ec 50%, #fff0f5 100%);
+    padding: 50px 20px 30px;
+    text-align: center;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+#main-title {
+    font-size: 2rem;
+    color: #c2185b;
+    margin-bottom: 8px;
+    outline: none;
+    border-bottom: 2px dashed transparent;
+    display: inline-block;
+}
+
+#main-title:hover,
+#main-title:focus {
+    border-bottom-color: #f8bbd0;
+}
+
+#opening-words {
+    color: #888;
+    font-size: 1rem;
+    margin-bottom: 16px;
+    outline: none;
+    border-bottom: 1px dashed transparent;
+    display: inline-block;
+    max-width: 80vw;
+}
+
+#opening-words:hover,
+#opening-words:focus {
+    border-bottom-color: #ddd;
+}
+
+.together-badge {
+    display: inline-block;
+    background: white;
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-size: 1rem;
+    color: #e91e63;
+    box-shadow: 0 2px 10px rgba(233, 30, 99, 0.15);
+}
+
+.together-badge span {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ff4081;
+}
+
+/* ========== 主内容区 ========== */
+.main-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 16px 40px;
+}
+
+/* 相册卡片 */
+.album-card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.album-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+.album-card h2 {
+    color: #e91e63;
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 输入行 */
+.input-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.input-row input,
+.input-row select {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 14px;
+    border: 2px solid #fce4ec;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.input-row input:focus,
+.input-row select:focus {
+    border-color: #f06292;
+}
+
+.input-row button {
+    padding: 10px 18px;
+    background: linear-gradient(135deg, #ff8a80 0%, #ffab91 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+}
+
+.input-row button:hover {
+    opacity: 0.9;
+}
+
+.tip {
+    font-size: 0.85rem;
+    color: #bbb;
+    margin-bottom: 12px;
+}
+
+/* 卡片列表 */
+.card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card-item {
+    background: #fff8fb;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s;
+}
+
+.card-item:hover {
+    transform: translateX(4px);
+}
+
+.card-item-info h3 {
+    font-size: 1rem;
+    color: #ad1457;
+    margin-bottom: 2px;
+}
+
+.card-item-info p {
+    font-size: 0.85rem;
+    color: #999;
+}
+
+.card-item-meta {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.card-item-meta .days {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #e91e63;
+}
+
+.card-item-meta .label {
+    font-size: 0.75rem;
+    color: #bbb;
+}
+
+.card-item .delete-btn {
+    background: #ffebee;
+    color: #e53935;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.card-item .delete-btn:hover {
+    background: #ef5350;
+    color: white;
+}
+
+/* 时间线样式 */
+.timeline .card-item {
+    border-left: 3px solid #ffab91;
+    border-radius: 0 14px 14px 0;
+}
+
+.timeline .mood {
+    font-size: 1.4rem;
+    margin-bottom: 2px;
+}
+
+.timeline .content {
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.timeline .date {
+    font-size: 0.8rem;
+    color: #bbb;
+}
+
+/* 照片墙 */
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.photo-item {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    aspect-ratio: 1;
+    background: #f5f5f5;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: transform 0.3s;
+}
+
+.photo-item:hover {
+    transform: scale(1.03);
+}
+
+.photo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.photo-item .photo-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+    color: white;
+    padding: 20px 8px 8px;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.photo-item .photo-del {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #e53935;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 留言板 */
+.message-list .card-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
+.message-author {
+    font-weight: bold;
+    color: #e91e63;
+    font-size: 0.95rem;
+}
+
+.message-date {
+    font-size: 0.75rem;
+    color: #ccc;
+}
+
+.message-content {
+    color: #555;
+    font-size: 0.95rem;
+    width: 100%;
+}
+
+/* 日历 */
+.calendar-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 0 8px;
+}
+
+.calendar-nav button {
+    background: #fff0f5;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #e91e63;
+    font-size: 1rem;
+}
+
+.calendar-nav span {
+    font-weight: bold;
+    color: #444;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+}
+
+.calendar-grid .weekday {
+    font-size: 0.8rem;
+    color: #aaa;
+    padding: 8px 0;
+}
+
+.calendar-grid .day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: #555;
+    cursor: default;
+    position: relative;
+}
+
+.calendar-grid .day.other-month {
+    color: #ddd;
+}
+
+.calendar-grid .day.has-event {
+    background: #fff0f5;
+    color: #e91e63;
+    font-weight: bold;
+}
+
+.calendar-grid .day.today {
+    border: 2px solid #e91e63;
+}
+
+.calendar-grid .day .dot {
+    width: 4px;
+    height: 4px;
+    background: #ff8a80;
+    border-radius: 50%;
+    margin-top: 2px;
+}
+
+/* 设置卡片 */
+.settings-card .setting-item {
+    margin-bottom: 16px;
+}
+
+.settings-card label {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.settings-card input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #fce4ec;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.settings-card input:focus {
+    border-color: #f06292;
+}
+
+.share-box {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.share-btn {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #ff6b9d 0%, #ff8e8e 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+#share-link {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* 底部 */
+.main-footer {
+    text-align: center;
+    padding: 30px 20px;
+    color: #ccc;
+    font-size: 0.85rem;
+}
+
+/* 空状态 */
+.empty-state {
+    text-align: center;
+    padding: 30px;
+    color: #ddd;
+    font-size: 0.9rem;
+}
+
+/* 文件输入隐藏 */
+input[type="file"] {
+    display: none;
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 480px) {
+    #cover-title {
+        font-size: 2rem;
+    }
+
+    .main-header {
+        padding: 30px 16px 20px;
+    }
+
+    #main-title {
+        font-size: 1.5rem;
+    }
+
+    .album-card {
+        padding: 16px;
+    }
+
+    .photo-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+
+    .input-row {
+        flex-direction: column;
+    }
+
+    .input-row input,
+    .input-row select,
+    .input-row button {
+        width: 100%;
+    }
+}
