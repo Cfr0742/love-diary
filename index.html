@@ -7,7 +7,8 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>💕 我们的纪念册</title>
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=4">
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.2.0/lunar.min.js"></script>
     <script>
     // 强制防缓存：确保对象总是获取最新代码
     (function() {
@@ -53,14 +54,39 @@
                 <h1 id="main-title" contenteditable="true">💕 我们的纪念册</h1>
                 <p id="opening-words" contenteditable="true">这是我们的故事，从此刻开始记录...</p>
                 <div class="together-badge">
-                    我们在一起已经 <span id="together-days">0</span> 天啦
+                    <div id="together-timer">我们在一起已经 <span id="together-days">0</span> 天啦</div>
+                    <button class="small-btn" onclick="showDateEditor()">📅 修改起始日期</button>
+                </div>
+                <div id="date-editor" style="display:none;margin-top:10px;">
+                    <input type="date" id="home-start-date">
+                    <button onclick="updateStartDateFromHome()">确认</button>
+                    <button onclick="hideDateEditor()">取消</button>
                 </div>
             </header>
             <section class="album-card">
+                <h2>📌 最近动态</h2>
+                <div id="recent-activity" class="recent-list"></div>
+            </section>
+
+            <section class="album-card">
                 <h2>🎂 纪念日</h2>
+                <div id="recent-anniversary" class="recent-badge" style="display:none;"></div>
                 <div class="input-row">
                     <input type="text" id="anni-name" placeholder="纪念日名称">
                     <input type="date" id="anni-date">
+                    <select id="anni-category">
+                        <option value="🎂">🎂 生日</option>
+                        <option value="💕">💕 恋爱</option>
+                        <option value="💍">💍 结婚</option>
+                        <option value="✈️">✈️ 旅行</option>
+                        <option value="🎉">🎉 其他</option>
+                    </select>
+                    <label style="display:flex;align-items:center;gap:4px;white-space:nowrap;">
+                        <input type="checkbox" id="anni-repeat" checked> 每年重复
+                    </label>
+                    <label style="display:flex;align-items:center;gap:4px;white-space:nowrap;">
+                        <input type="checkbox" id="anni-lunar"> 农历
+                    </label>
                     <button onclick="addAnniversary()">添加</button>
                 </div>
                 <div id="anniversary-list" class="card-list"></div>
@@ -129,6 +155,38 @@
                 <div class="calendar-grid" id="calendar-grid"></div>
             </section>
             <section class="album-card settings-card">
+                <h2>🎵 一起听歌</h2>
+                <div id="music-player">
+                    <div class="now-playing">
+                        <div class="vinyl-disc" id="vinyl">💿</div>
+                        <div class="song-info">
+                            <div id="now-song-name">选择一首歌</div>
+                            <div id="now-song-artist">-</div>
+                            <div id="ta-listening" class="ta-tip"></div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <span id="current-time">0:00</span>
+                        <input type="range" id="progress" value="0" min="0" max="100" oninput="seekMusic(this.value)">
+                        <span id="total-time">0:00</span>
+                    </div>
+                    <div class="music-controls">
+                        <button onclick="prevSong()">⏮</button>
+                        <button onclick="togglePlay()" id="play-btn">▶️</button>
+                        <button onclick="nextSong()">⏭</button>
+                        <button onclick="toggleMute()" id="mute-btn">🔊</button>
+                    </div>
+                    <input type="range" id="volume-slider" min="0" max="100" value="50" oninput="setVolume(this.value)">
+                    <div class="playlist" id="playlist"></div>
+                    <div class="input-row" style="margin-top:10px;">
+                        <input type="text" id="custom-song-url" placeholder="粘贴网易云/QQ音乐链接">
+                        <input type="text" id="custom-song-name" placeholder="歌名">
+                        <button onclick="addCustomSong()">添加</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="album-card settings-card">
                 <h2>⚙️ 设置 & 分享</h2>
                 <div class="setting-item">
                     <label>在一起起始日期：</label>
@@ -139,15 +197,23 @@
                     <input type="text" id="set-password" placeholder="设置密码" onchange="updatePassword()">
                 </div>
                 <div class="setting-item">
-                    <label>背景音乐链接（MP3地址）：</label>
-                    <input type="text" id="music-url" placeholder="https://...mp3" onchange="updateMusic()">
-                    <audio id="bg-music" loop></audio>
-                    <button onclick="toggleMusic()" id="music-btn">🎵 播放/暂停</button>
+                    <label>主题颜色：</label>
+                    <div class="theme-selector">
+                        <button onclick="switchTheme('pink')" class="theme-btn theme-pink" title="粉色">💗</button>
+                        <button onclick="switchTheme('blue')" class="theme-btn theme-blue" title="蓝色">💙</button>
+                        <button onclick="switchTheme('purple')" class="theme-btn theme-purple" title="紫色">💜</button>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <button onclick="exportData()" class="share-btn">📥 导出数据备份</button>
+                    <input type="file" id="import-file" accept=".json" onchange="importData(this)" style="display:none;">
+                    <button onclick="document.getElementById('import-file').click()" class="share-btn" style="margin-top:8px;background:linear-gradient(135deg,#81c784,#66bb6a);">📤 导入数据恢复</button>
                 </div>
                 <div class="setting-item share-box">
                     <button onclick="generateShareLink()" class="share-btn">🔗 生成分享链接发给TA</button>
                     <input type="text" id="share-link" readonly placeholder="点击按钮生成链接">
                 </div>
+                <div id="online-status" class="online-badge"></div>
             </section>
         </div>
 
@@ -179,6 +245,6 @@
 
 </div>
 
-<script src="app.v4.js?v=5"></script>
+<script src="app.v5.js?v=6"></script>
 </body>
 </html>
