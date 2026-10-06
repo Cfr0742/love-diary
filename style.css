@@ -1,3 +1,24 @@
+:root {
+    --primary: #e91e63;
+    --primary-light: #ff4081;
+    --gradient-start: #ff6b9d;
+    --gradient-end: #ff8e8e;
+}
+
+.theme-blue {
+    --primary: #2196f3;
+    --primary-light: #64b5f6;
+    --gradient-start: #42a5f5;
+    --gradient-end: #90caf9;
+}
+
+.theme-purple {
+    --primary: #9c27b0;
+    --primary-light: #ce93d8;
+    --gradient-start: #ab47bc;
+    --gradient-end: #ba68c8;
+}
+
 /* ========== 基础重置 ========== */
 * {
     margin: 0;
@@ -710,4 +731,205 @@ input[type="file"] {
 /* 底部导航安全区 */
 .tab-content {
     padding-bottom: 70px;
+}
+
+/* ========== 主题色覆盖 ========== */
+.theme-blue .enter-btn,
+.theme-blue .share-btn,
+.theme-blue .input-row button {
+    background: linear-gradient(135deg, #42a5f5 0%, #90caf9 100%);
+}
+.theme-blue .main-header {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #e3f2fd 100%);
+}
+.theme-blue .tab-item.active { color: #42a5f5; }
+.theme-blue .together-badge { color: #2196f3; }
+.theme-blue .together-badge span { color: #64b5f6; }
+
+.theme-purple .enter-btn,
+.theme-purple .share-btn,
+.theme-purple .input-row button {
+    background: linear-gradient(135deg, #ab47bc 0%, #ba68c8 100%);
+}
+.theme-purple .main-header {
+    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 50%, #f3e5f5 100%);
+}
+.theme-purple .tab-item.active { color: #ab47bc; }
+.theme-purple .together-badge { color: #9c27b0; }
+.theme-purple .together-badge span { color: #ce93d8; }
+
+/* ========== 音乐播放器 ========== */
+.now-playing {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.vinyl-disc {
+    font-size: 36px;
+    animation: spin 4s linear infinite;
+    animation-play-state: paused;
+    flex-shrink: 0;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.song-info {
+    flex: 1;
+    min-width: 0;
+}
+#now-song-name {
+    font-weight: bold;
+    color: var(--primary, #e91e63);
+    font-size: 1rem;
+}
+#now-song-artist {
+    font-size: 0.85rem;
+    color: #999;
+}
+.ta-tip {
+    font-size: 0.75rem;
+    color: #4caf50;
+    margin-top: 2px;
+}
+.progress-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 0.75rem;
+    color: #999;
+}
+.progress-bar input[type="range"] {
+    flex: 1;
+    height: 4px;
+}
+.music-controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 10px;
+}
+.music-controls button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 4px;
+}
+#volume-slider {
+    width: 100%;
+    margin-bottom: 12px;
+}
+.playlist {
+    max-height: 160px;
+    overflow-y: auto;
+    border-radius: 10px;
+    background: #fafafa;
+    padding: 8px;
+}
+.playlist-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+.playlist-item:hover, .playlist-item.active {
+    background: #fff0f5;
+    color: var(--primary, #e91e63);
+}
+
+/* ========== 日历事件 ========== */
+.cal-event {
+    font-size: 0.65rem;
+    color: var(--primary, #e91e63);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* ========== 最近动态 ========== */
+.recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.recent-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #fff8fb;
+    border-radius: 10px;
+    font-size: 0.9rem;
+}
+.recent-item span:first-child {
+    font-size: 1.2rem;
+}
+.recent-item span:last-child {
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.recent-badge {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: white;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+/* ========== 主题选择器 ========== */
+.theme-selector {
+    display: flex;
+    gap: 10px;
+}
+.theme-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+}
+.theme-btn:hover { transform: scale(1.1); }
+.theme-btn.active { border-color: #333; }
+.theme-pink { background: linear-gradient(135deg, #ff6b9d, #ff8e8e); }
+.theme-blue { background: linear-gradient(135deg, #42a5f5, #90caf9); }
+.theme-purple { background: linear-gradient(135deg, #ab47bc, #ba68c8); }
+
+/* ========== 在线状态 ========== */
+.online-badge {
+    text-align: center;
+    padding: 10px;
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+/* ========== 小按钮 ========== */
+.small-btn {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    background: white;
+    border: 1px solid #fce4ec;
+    border-radius: 20px;
+    color: var(--primary, #e91e63);
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+}
+.small-btn:hover {
+    background: var(--primary, #e91e63);
+    color: white;
 }
