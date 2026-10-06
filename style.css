@@ -357,6 +357,15 @@ body {
     color: #bbb;
 }
 
+.card-item-meta.past .days {
+    font-size: 0.95rem;
+    color: #bbb;
+}
+
+.card-item-meta.past .label {
+    color: #ccc;
+}
+
 .card-item .delete-btn {
     background: #ffebee;
     color: #e53935;
