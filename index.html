@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>💕 我们的纪念册</title>
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=5">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.2.0/lunar.min.js"></script>
     <script>
     // 强制防缓存：确保对象总是获取最新代码
@@ -55,6 +55,7 @@
                 <p id="opening-words" contenteditable="true">这是我们的故事，从此刻开始记录...</p>
                 <div class="together-badge">
                     <div id="together-timer">我们在一起已经 <span id="together-days">0</span> 天啦</div>
+                    <div id="nearest-anni" style="font-size:0.85em;margin-top:4px;opacity:0.9;font-weight:500;"></div>
                     <button class="small-btn" onclick="showDateEditor()">📅 修改起始日期</button>
                 </div>
                 <div id="date-editor" style="display:none;margin-top:10px;">
@@ -125,7 +126,7 @@
                     <button onclick="document.getElementById('photo-file').click()">📁 上传本地图</button>
                     <button onclick="addPhotoUrl()">添加链接</button>
                 </div>
-                <p class="tip">💡 建议先用微博/小红书/QQ空间传图，复制图片链接贴进来，这样不占用空间</p>
+                <p class="tip">💡 本地图会自动压缩存储，也可粘贴外部图片链接（真正无限张）</p>
                 <div id="photo-grid" class="photo-grid"></div>
             </section>
         </div>
@@ -245,6 +246,6 @@
 
 </div>
 
-<script src="app.v5.js?v=6"></script>
+<script src="app.v6.js?v=7"></script>
 </body>
 </html>
