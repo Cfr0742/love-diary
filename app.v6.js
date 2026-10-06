@@ -931,10 +931,12 @@ function renderAnniversaries() {
         const lunarTag = anni.isLunar ? ' 农历' : '';
         const repeatTag = anni.repeat ? ' 每年' : '';
         const div = document.createElement('div');
-        div.className = 'card-item';
+        div.className = 'card-item anni-row';
+        const rowText = diff === 0
+            ? `${anni.category || '🎉'} ${anni.name}，就是今天！🎉`
+            : `${anni.category || '🎉'} ${anni.name}，还有 ${diff} 天`;
         div.innerHTML = `
-            <div class="card-item-info"><h3>${anni.category || '🎉'} ${anni.name}</h3><p>${anni.date}${lunarTag}${repeatTag}</p></div>
-            <div class="card-item-meta"><div class="days">${display}</div><div class="label">${diff === 0 ? '就是今天' : label + '天'}</div></div>
+            <span class="anni-text">${rowText}</span>
             <button class="delete-btn" onclick="deleteAnniversary('${anni.id}')">删除</button>`;
         list.appendChild(div);
     });
