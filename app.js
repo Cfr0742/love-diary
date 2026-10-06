@@ -83,7 +83,7 @@ async function saveToCloud() {
         if (sha) body.sha = sha;
 
         const putRes = await fetch(`https://gitee.com/api/v5/repos/${user}/${GITEE_REPO}/contents/${GITEE_FILE}`, {
-            method: "PUT",
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `token ${GITEE_TOKEN}`
