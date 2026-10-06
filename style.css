@@ -926,6 +926,21 @@ input[type="file"] {
     margin-top: 10px;
 }
 
+.anni-row {
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+}
+.anni-text {
+    font-size: 1rem;
+    color: #444;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    margin-right: 10px;
+}
+
 /* ========== 小按钮 ========== */
 .small-btn {
     padding: 6px 14px;
