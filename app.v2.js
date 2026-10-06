@@ -6,7 +6,7 @@ const GITEE_TOKEN = "7f5d25c730457bcb5d8f2349dd7d7294";
 const GITEE_REPO = "love-diary";
 const GITEE_FILE = "data.json";
 const GITEE_BRANCH = "master";
-let giteeUser = null;
+let giteeUser = "cfr0742";
 let syncStatus = "idle";
 let syncTimer = null;
 let lastError = "";
@@ -37,40 +37,67 @@ async function getGiteeUser() {
 async function loadFromCloud() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("d")) return false;
-    const user = await getGiteeUser();
-    if (!user) return false;
+    const user = giteeUser || await getGiteeUser();
+    if (!user) {
+        showDebugError("加载失败: 无法获取用户名");
+        return false;
+    }
     try {
-        // 使用 Gitee API 获取文件内容（支持私有仓库，带 Token 认证）
         const apiUrl = `https://gitee.com/api/v5/repos/${user}/${GITEE_REPO}/contents/${GITEE_FILE}?ref=${GITEE_BRANCH}&t=${Date.now()}`;
         const res = await fetch(apiUrl, {
             headers: { "Authorization": `token ${GITEE_TOKEN}` }
         });
-        if (res.ok) {
-            const fileInfo = await res.json();
-            if (fileInfo.content) {
-                // base64 解码（支持中文）
-                const binString = atob(fileInfo.content);
-                const bytes = Uint8Array.from(binString, c => c.charCodeAt(0));
-                const text = new TextDecoder().decode(bytes);
-                if (!text.trim() || text.trim() === "{}") return false;
-                const cloudData = JSON.parse(text);
-                Object.assign(data, cloudData);
-                localStorage.setItem("loveDataV2", JSON.stringify(data));
-                return true;
-            }
+        if (!res.ok) {
+            showDebugError(`加载失败: HTTP ${res.status} - ${await res.text()}`);
+            return false;
         }
+        const fileInfo = await res.json();
+        if (!fileInfo.content) {
+            showDebugError("加载失败: 云端内容为空");
+            return false;
+        }
+        const cleanContent = fileInfo.content.replace(/\n/g, "");
+        const binString = atob(cleanContent);
+        const bytes = Uint8Array.from(binString, c => c.charCodeAt(0));
+        const text = new TextDecoder().decode(bytes);
+        if (!text.trim() || text.trim() === "{}") {
+            showDebugError("加载提示: 云端数据为空对象");
+            return false;
+        }
+        const cloudData = JSON.parse(text);
+        Object.assign(data, cloudData);
+        localStorage.setItem("loveDataV2", JSON.stringify(data));
+        showDebugError("✅ 已从云端加载数据！", true);
+        return true;
     } catch (e) {
+        showDebugError(`加载失败: ${e.name}: ${e.message}`);
         console.error("从云端加载失败", e);
     }
     return false;
 }
 
+function showDebugError(msg, isSuccess) {
+    let el = document.getElementById("debug-error");
+    if (!el) {
+        el = document.createElement("div");
+        el.id = "debug-error";
+        el.style.cssText = "position:fixed;top:10px;left:10px;right:10px;padding:12px;border-radius:8px;font-size:14px;z-index:10000;background:rgba(255,0,0,0.9);color:white;word-break:break-all;";
+        document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.style.background = isSuccess ? "rgba(0,128,0,0.9)" : "rgba(200,0,0,0.9)";
+    if (isSuccess) {
+        setTimeout(() => { if (el) el.remove(); }, 5000);
+    }
+}
+
 async function saveToCloud() {
-    const user = await getGiteeUser();
+    const user = giteeUser || await getGiteeUser();
     if (!user) {
         lastError = "无法获取用户信息";
         syncStatus = "error";
         showSyncStatus();
+        showDebugError("保存失败: 无法获取用户名");
         return;
     }
     syncStatus = "syncing";
