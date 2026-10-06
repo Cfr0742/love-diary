@@ -40,15 +40,24 @@ async function loadFromCloud() {
     const user = await getGiteeUser();
     if (!user) return false;
     try {
-        const rawUrl = `https://gitee.com/${user}/${GITEE_REPO}/raw/${GITEE_BRANCH}/${GITEE_FILE}?t=${Date.now()}`;
-        const res = await fetch(rawUrl, { cache: "no-cache" });
+        // 使用 Gitee API 获取文件内容（支持私有仓库，带 Token 认证）
+        const apiUrl = `https://gitee.com/api/v5/repos/${user}/${GITEE_REPO}/contents/${GITEE_FILE}?ref=${GITEE_BRANCH}&t=${Date.now()}`;
+        const res = await fetch(apiUrl, {
+            headers: { "Authorization": `token ${GITEE_TOKEN}` }
+        });
         if (res.ok) {
-            const text = await res.text();
-            if (!text.trim() || text.trim() === "{}") return false;
-            const cloudData = JSON.parse(text);
-            Object.assign(data, cloudData);
-            localStorage.setItem("loveDataV2", JSON.stringify(data));
-            return true;
+            const fileInfo = await res.json();
+            if (fileInfo.content) {
+                // base64 解码（支持中文）
+                const binString = atob(fileInfo.content);
+                const bytes = Uint8Array.from(binString, c => c.charCodeAt(0));
+                const text = new TextDecoder().decode(bytes);
+                if (!text.trim() || text.trim() === "{}") return false;
+                const cloudData = JSON.parse(text);
+                Object.assign(data, cloudData);
+                localStorage.setItem("loveDataV2", JSON.stringify(data));
+                return true;
+            }
         }
     } catch (e) {
         console.error("从云端加载失败", e);
@@ -790,3 +799,28 @@ setTimeout(() => {
         }
     });
 }, 500);
+
+// ==========================
+// 底部 Tab 切换
+// ==========================
+
+function switchTab(tabName, element) {
+    // 隐藏所有 tab-page
+    document.querySelectorAll('.tab-page').forEach(page => {
+        page.classList.remove('active');
+    });
+    // 显示目标 tab-page
+    const target = document.getElementById('tab-' + tabName);
+    if (target) target.classList.add('active');
+
+    // 更新底部导航高亮
+    document.querySelectorAll('.tab-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    if (element) element.classList.add('active');
+
+    // 切换到我的页面时，重新渲染日历
+    if (tabName === 'profile') {
+        renderCalendar();
+    }
+}
