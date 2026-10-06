@@ -115,28 +115,34 @@ async function saveToCloud() {
             lastError = `获取文件信息失败(${getRes.status})`;
         }
 
-        const body = { message: "update love data", content: content, branch: GITEE_BRANCH };
-        if (sha) body.sha = sha;
+        // Gitee 更新文件需要 PUT + form-urlencoded + access_token 在 URL 中
+        const formData = new URLSearchParams();
+        formData.append("message", "update love data");
+        formData.append("content", content);
+        formData.append("branch", GITEE_BRANCH);
+        if (sha) formData.append("sha", sha);
 
-        const putRes = await fetch(`https://gitee.com/api/v5/repos/${user}/${GITEE_REPO}/contents/${GITEE_FILE}`, {
-            method: "POST",
+        const putRes = await fetch(`https://gitee.com/api/v5/repos/${user}/${GITEE_REPO}/contents/${GITEE_FILE}?access_token=${GITEE_TOKEN}`, {
+            method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `token ${GITEE_TOKEN}`
+                "Content-Type": "application/x-www-form-urlencoded"
             },
-            body: JSON.stringify(body)
+            body: formData.toString()
         });
         if (putRes.ok) {
             syncStatus = "success";
             lastError = "";
+            showDebugError("✅ 已同步到云端！", true);
         } else {
             const errText = await putRes.text();
             lastError = `保存失败(${putRes.status})`;
+            showDebugError(`保存失败: ${errText}`);
             console.error("保存到云端失败", putRes.status, errText);
             syncStatus = "error";
         }
     } catch (e) {
         lastError = "网络请求出错";
+        showDebugError(`保存出错: ${e.message}`);
         console.error("保存到云端出错", e);
         syncStatus = "error";
     }
