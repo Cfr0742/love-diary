@@ -173,6 +173,293 @@ function showSyncStatus() {
 }
 
 // ==========================
+// 内置歌单
+// ==========================
+
+const defaultPlaylist = [
+    { name: "小幸运", artist: "田馥甄", url: "https://music.163.com/song/media/outer/url?id=409654891.mp3" },
+    { name: "告白气球", artist: "周杰伦", url: "https://music.163.com/song/media/outer/url?id=418603077.mp3" },
+    { name: "慢慢喜欢你", artist: "莫文蔚", url: "https://music.163.com/song/media/outer/url?id=1297742298.mp3" },
+    { name: "遇见", artist: "孙燕姿", url: "https://music.163.com/song/media/outer/url?id=287017.mp3" },
+    { name: "简单爱", artist: "周杰伦", url: "https://music.163.com/song/media/outer/url?id=185800.mp3" }
+];
+
+let playlist = [];
+let audioPlayer = null;
+let musicTimer = null;
+
+function initPlaylist() {
+    playlist = [...defaultPlaylist];
+    if (data.music && data.music.customSongs) {
+        playlist = playlist.concat(data.music.customSongs);
+    }
+}
+
+function renderPlaylist() {
+    const el = document.getElementById('playlist');
+    if (!el) return;
+    el.innerHTML = '';
+    playlist.forEach((song, idx) => {
+        const div = document.createElement('div');
+        div.className = 'playlist-item' + (idx === data.music.currentSongIndex ? ' active' : '');
+        div.innerHTML = `<span>${song.name} - ${song.artist}</span><span>${idx === data.music.currentSongIndex && data.music.isPlaying ? '▶' : ''}</span>`;
+        div.onclick = () => playSong(idx);
+        el.appendChild(div);
+    });
+}
+
+function playSong(idx) {
+    if (!audioPlayer) {
+        audioPlayer = new Audio();
+        audioPlayer.addEventListener('ended', () => nextSong());
+        audioPlayer.addEventListener('timeupdate', updateProgress);
+    }
+    if (idx < 0 || idx >= playlist.length) return;
+    data.music.currentSongIndex = idx;
+    data.music.isPlaying = true;
+    audioPlayer.src = playlist[idx].url;
+    audioPlayer.volume = data.music.isMuted ? 0 : (data.music.volume / 100);
+    audioPlayer.currentTime = data.music.currentTime || 0;
+    audioPlayer.play().catch(() => showDebugError('音乐播放失败，请检查链接'));
+    updateMusicUI();
+    saveData();
+    renderPlaylist();
+}
+
+function togglePlay() {
+    if (!audioPlayer) { playSong(data.music.currentSongIndex >= 0 ? data.music.currentSongIndex : 0); return; }
+    if (data.music.isPlaying) {
+        audioPlayer.pause();
+        data.music.isPlaying = false;
+    } else {
+        if (!audioPlayer.src && playlist.length > 0) { playSong(0); return; }
+        audioPlayer.play().catch(() => {});
+        data.music.isPlaying = true;
+    }
+    updateMusicUI();
+    saveData();
+    renderPlaylist();
+}
+
+function nextSong() {
+    let idx = data.music.currentSongIndex + 1;
+    if (idx >= playlist.length) idx = 0;
+    playSong(idx);
+}
+
+function prevSong() {
+    let idx = data.music.currentSongIndex - 1;
+    if (idx < 0) idx = playlist.length - 1;
+    playSong(idx);
+}
+
+function setVolume(val) {
+    data.music.volume = parseInt(val);
+    if (audioPlayer) audioPlayer.volume = data.music.isMuted ? 0 : (data.music.volume / 100);
+    saveData();
+}
+
+function toggleMute() {
+    data.music.isMuted = !data.music.isMuted;
+    if (audioPlayer) audioPlayer.volume = data.music.isMuted ? 0 : (data.music.volume / 100);
+    updateMusicUI();
+    saveData();
+}
+
+function updateProgress() {
+    if (!audioPlayer) return;
+    const cur = formatTime(audioPlayer.currentTime);
+    const tot = formatTime(audioPlayer.duration || 0);
+    document.getElementById('current-time').textContent = cur;
+    document.getElementById('total-time').textContent = tot;
+    document.getElementById('progress').value = audioPlayer.duration ? (audioPlayer.currentTime / audioPlayer.duration * 100) : 0;
+    data.music.currentTime = audioPlayer.currentTime;
+}
+
+function seekMusic(val) {
+    if (!audioPlayer || !audioPlayer.duration) return;
+    audioPlayer.currentTime = audioPlayer.duration * (val / 100);
+}
+
+function formatTime(s) {
+    if (!s || isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+}
+
+function updateMusicUI() {
+    const idx = data.music.currentSongIndex;
+    const song = idx >= 0 && idx < playlist.length ? playlist[idx] : null;
+    document.getElementById('now-song-name').textContent = song ? song.name : '选择一首歌';
+    document.getElementById('now-song-artist').textContent = song ? song.artist : '-';
+    document.getElementById('play-btn').textContent = data.music.isPlaying ? '⏸' : '▶️';
+    document.getElementById('mute-btn').textContent = data.music.isMuted ? '🔇' : '🔊';
+    const vinyl = document.getElementById('vinyl');
+    if (vinyl) vinyl.style.animationPlayState = data.music.isPlaying ? 'running' : 'paused';
+}
+
+function addCustomSong() {
+    const url = document.getElementById('custom-song-url').value.trim();
+    const name = document.getElementById('custom-song-name').value.trim() || '自定义歌曲';
+    if (!url) { alert('请输入音乐链接'); return; }
+    if (!data.music.customSongs) data.music.customSongs = [];
+    data.music.customSongs.push({ name, artist: '未知', url });
+    saveData();
+    initPlaylist();
+    renderPlaylist();
+    document.getElementById('custom-song-url').value = '';
+    document.getElementById('custom-song-name').value = '';
+}
+
+function checkPartnerListening() {
+    const el = document.getElementById('ta-listening');
+    if (!el || !data.music || data.music.currentSongIndex < 0) { if (el) el.textContent = ''; return; }
+    // 如果对方正在播放，显示提示（通过云端同步的数据判断）
+    const song = playlist[data.music.currentSongIndex];
+    if (song && data.music.isPlaying) {
+        el.textContent = `💕 正在听《${song.name}》`;
+    } else if (song) {
+        el.textContent = `💿 上次听到《${song.name}》`;
+    } else {
+        el.textContent = '';
+    }
+}
+
+// ==========================
+// 主题切换
+// ==========================
+
+function switchTheme(theme) {
+    data.theme = theme;
+    document.body.className = 'theme-' + theme;
+    saveData();
+}
+
+// ==========================
+// 导出/导入
+// ==========================
+
+function exportData() {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `love-diary-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showDebugError('✅ 数据已导出！', true);
+}
+
+function importData(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const imported = JSON.parse(e.target.result);
+            Object.assign(data, imported);
+            localStorage.setItem('loveDataV2', JSON.stringify(data));
+            saveToCloud();
+            alert('数据恢复成功！页面即将刷新');
+            location.reload();
+        } catch (err) {
+            alert('文件格式错误，无法恢复');
+        }
+    };
+    reader.readAsText(file);
+    input.value = '';
+}
+
+// ==========================
+// 在线状态
+// ==========================
+
+function updateOnlineStatus() {
+    data.lastActive = Date.now();
+    saveData();
+    const el = document.getElementById('online-status');
+    if (!el) return;
+    if (!data.lastActive) { el.textContent = ''; return; }
+    const diff = Date.now() - new Date(data.lastActive).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 5) {
+        el.textContent = '💕 对方正在看纪念册';
+        el.style.color = '#4caf50';
+    } else if (mins < 60) {
+        el.textContent = `💤 对方 ${mins} 分钟前来过`;
+        el.style.color = '#999';
+    } else {
+        el.textContent = '';
+    }
+}
+
+// ==========================
+// 最近动态
+// ==========================
+
+function renderRecentActivity() {
+    const el = document.getElementById('recent-activity');
+    if (!el) return;
+    const items = [];
+    data.anniversaries.slice(-2).forEach(a => items.push({ type: '🎂', text: a.name, time: a.date }));
+    data.dailies.slice(-2).forEach(d => items.push({ type: '📝', text: d.content, time: d.date }));
+    data.messages.slice(-2).forEach(m => items.push({ type: '💌', text: m.content, time: m.date }));
+    items.sort((a, b) => new Date(b.time || 0) - new Date(a.time || 0));
+    el.innerHTML = items.slice(0, 5).map(i => `<div class="recent-item"><span>${i.type}</span> <span>${i.text}</span></div>`).join('') || '<div class="empty-state">还没有动态~</div>';
+}
+
+// ==========================
+// 首页日期修改
+// ==========================
+
+function showDateEditor() {
+    const editor = document.getElementById('date-editor');
+    const input = document.getElementById('home-start-date');
+    if (editor) editor.style.display = 'flex';
+    if (input) input.value = data.startDate;
+}
+
+function hideDateEditor() {
+    const editor = document.getElementById('date-editor');
+    if (editor) editor.style.display = 'none';
+}
+
+function updateStartDateFromHome() {
+    const val = document.getElementById('home-start-date').value;
+    if (val) {
+        data.startDate = val;
+        saveData();
+        updateTogetherDays();
+        renderCalendar();
+        hideDateEditor();
+        showDebugError('✅ 起始日期已更新！', true);
+    }
+}
+
+// ==========================
+// 农历支持
+// ==========================
+
+function getLunarDate(dateStr) {
+    if (typeof Lunar === 'undefined') return null;
+    try {
+        const d = new Date(dateStr);
+        const lunar = Lunar.fromDate(d);
+        return { month: lunar.getMonth(), day: lunar.getDay() };
+    } catch (e) { return null; }
+}
+
+function lunarToSolar(lunarMonth, lunarDay, year) {
+    if (typeof Lunar === 'undefined') return null;
+    try {
+        const lunar = Lunar.fromYmd(year, lunarMonth, lunarDay);
+        const solar = lunar.getSolar();
+        return `${solar.getYear()}-${String(solar.getMonth()).padStart(2,'0')}-${String(solar.getDay()).padStart(2,'0')}`;
+    } catch (e) { return null; }
+}
+
+// ==========================
 // 数据管理
 // ==========================
 
@@ -200,18 +487,21 @@ function loadData() {
             console.error("本地数据解析失败", e);
         }
     }
-    return {
+    const defaults = {
         coverTitle: "💕 我们的纪念册",
         mainTitle: "💕 我们的纪念册",
         openingWords: "这是我们的故事，从此刻开始记录...",
         password: "",
         startDate: "2024-01-01",
+        theme: "pink",
         anniversaries: [],
         dailies: [],
         photos: [],
         messages: [],
-        musicUrl: ""
+        music: { currentSongIndex: -1, isPlaying: false, volume: 50, isMuted: false, currentTime: 0 },
+        lastActive: null
     };
+    return defaults;
 }
 
 function saveData() {
@@ -274,9 +564,24 @@ function checkPassword() {
 function initMain() {
     document.getElementById('main-title').innerText = data.mainTitle;
     document.getElementById('opening-words').innerText = data.openingWords;
-    document.getElementById('start-date').value = data.startDate;
-    document.getElementById('set-password').value = data.password;
-    document.getElementById('music-url').value = data.musicUrl;
+    const startInput = document.getElementById('start-date');
+    if (startInput) startInput.value = data.startDate;
+    const pwdInput = document.getElementById('set-password');
+    if (pwdInput) pwdInput.value = data.password;
+
+    // 主题
+    switchTheme(data.theme || 'pink');
+
+    // 音乐初始化
+    if (!data.music) data.music = { currentSongIndex: -1, isPlaying: false, volume: 50, isMuted: false, currentTime: 0 };
+    initPlaylist();
+    renderPlaylist();
+    updateMusicUI();
+    if (audioPlayer) {
+        audioPlayer.volume = data.music.isMuted ? 0 : (data.music.volume / 100);
+        document.getElementById('volume-slider').value = data.music.volume;
+    }
+    checkPartnerListening();
 
     updateTogetherDays();
     renderAnniversaries();
@@ -284,7 +589,8 @@ function initMain() {
     renderPhotos();
     renderMessages();
     renderCalendar();
-    setupMusic();
+    renderRecentActivity();
+    updateOnlineStatus();
 
     // 可编辑元素监听
     document.getElementById('main-title').addEventListener('blur', () => {
@@ -297,8 +603,10 @@ function initMain() {
     });
 
     // 设置日期默认值
-    document.getElementById('anni-date').valueAsDate = new Date();
-    document.getElementById('daily-date').valueAsDate = new Date();
+    const anniDate = document.getElementById('anni-date');
+    if (anniDate) anniDate.valueAsDate = new Date();
+    const dailyDate = document.getElementById('daily-date');
+    if (dailyDate) dailyDate.valueAsDate = new Date();
 }
 
 // ==========================
@@ -501,16 +809,29 @@ function stopHeartAnimation() {
 // ==========================
 
 function updateTogetherDays() {
-    const start = new Date(data.startDate);
-    const now = new Date();
-    const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-    document.getElementById("together-days").textContent = diff;
+    const start = new Date(data.startDate + 'T00:00:00');
+    function update() {
+        const now = new Date();
+        const diffMs = now - start;
+        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+        const el = document.getElementById('together-days');
+        if (el) {
+            el.innerHTML = `${days}<span style="font-size:0.6em">天</span>${hours}<span style="font-size:0.6em">时</span>${minutes}<span style="font-size:0.6em">分</span>${seconds}<span style="font-size:0.6em">秒</span>`;
+        }
+    }
+    update();
+    if (window.togetherTimer) clearInterval(window.togetherTimer);
+    window.togetherTimer = setInterval(update, 1000);
 }
 
 function updateStartDate() {
     data.startDate = document.getElementById('start-date').value;
     saveData();
     updateTogetherDays();
+    renderCalendar();
 }
 
 // ==========================
@@ -520,11 +841,23 @@ function updateStartDate() {
 function addAnniversary() {
     const name = document.getElementById('anni-name').value.trim();
     const date = document.getElementById('anni-date').value;
+    const category = document.getElementById('anni-category').value;
+    const repeat = document.getElementById('anni-repeat').checked;
+    const isLunar = document.getElementById('anni-lunar').checked;
     if (!name || !date) { alert('请填写完整哦~'); return; }
-    data.anniversaries.push({ id: Date.now().toString(), name, date });
+    const item = { id: Date.now().toString(), name, date, category: category || '🎉', repeat: !!repeat, isLunar: !!isLunar };
+    if (isLunar) {
+        const lunar = getLunarDate(date);
+        if (lunar) item.lunarDate = lunar;
+    }
+    data.anniversaries.push(item);
     saveData();
     document.getElementById('anni-name').value = '';
+    document.getElementById('anni-repeat').checked = true;
+    document.getElementById('anni-lunar').checked = false;
     renderAnniversaries();
+    renderCalendar();
+    renderRecentActivity();
 }
 
 function deleteAnniversary(id) {
@@ -535,35 +868,68 @@ function deleteAnniversary(id) {
     renderCalendar();
 }
 
+function getNextAnniversaryDate(anni) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    let targetDate = null;
+    if (anni.isLunar && anni.lunarDate) {
+        const solar = lunarToSolar(anni.lunarDate.month, anni.lunarDate.day, today.getFullYear());
+        if (solar) targetDate = new Date(solar);
+    }
+    if (!targetDate) {
+        targetDate = new Date(anni.date);
+    }
+    targetDate.setHours(0,0,0,0);
+    if (anni.repeat) {
+        targetDate.setFullYear(today.getFullYear());
+        if (targetDate < today) targetDate.setFullYear(today.getFullYear() + 1);
+    }
+    return targetDate;
+}
+
 function renderAnniversaries() {
     const list = document.getElementById('anniversary-list');
+    if (!list) return;
     list.innerHTML = '';
     if (data.anniversaries.length === 0) {
         list.innerHTML = '<div class="empty-state">还没有纪念日，快去添加第一个吧 💕</div>';
         return;
     }
-    data.anniversaries.sort((a, b) => new Date(a.date) - new Date(b.date));
-    data.anniversaries.forEach(anni => {
-        const today = new Date(); today.setHours(0,0,0,0);
-        const ad = new Date(anni.date); ad.setHours(0,0,0,0);
-        let diff = Math.ceil((ad - today) / 86400000);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const sorted = [...data.anniversaries].sort((a,b) => {
+        const da = getNextAnniversaryDate(a);
+        const db = getNextAnniversaryDate(b);
+        return da - db;
+    });
+    sorted.forEach(anni => {
+        const target = getNextAnniversaryDate(anni);
+        const diff = Math.ceil((target - today) / 86400000);
         let label = '', display = diff;
         if (diff === 0) { label = '就是今天！🎉'; display = '🎉'; }
-        else if (diff < 0) {
-            const ny = new Date(ad); ny.setFullYear(today.getFullYear());
-            if (ny < today) ny.setFullYear(today.getFullYear() + 1);
-            diff = Math.ceil((ny - today) / 86400000);
-            display = diff; label = '还有';
-        } else { label = '还有'; }
-
+        else if (diff < 0) { label = '已过去'; display = Math.abs(diff); }
+        else { label = '还有'; }
+        const lunarTag = anni.isLunar ? ' 农历' : '';
+        const repeatTag = anni.repeat ? ' 每年' : '';
         const div = document.createElement('div');
         div.className = 'card-item';
         div.innerHTML = `
-            <div class="card-item-info"><h3>${anni.name}</h3><p>${anni.date}</p></div>
+            <div class="card-item-info"><h3>${anni.category || '🎉'} ${anni.name}</h3><p>${anni.date}${lunarTag}${repeatTag}</p></div>
             <div class="card-item-meta"><div class="days">${display}</div><div class="label">${diff === 0 ? '就是今天' : label + '天'}</div></div>
             <button class="delete-btn" onclick="deleteAnniversary('${anni.id}')">删除</button>`;
         list.appendChild(div);
     });
+    // 首页显示最近纪念日
+    const recentEl = document.getElementById('recent-anniversary');
+    if (recentEl && sorted.length > 0) {
+        const nearest = sorted[0];
+        const target = getNextAnniversaryDate(nearest);
+        const diff = Math.ceil((target - new Date().setHours(0,0,0,0)) / 86400000);
+        if (diff <= 30) {
+            recentEl.style.display = 'block';
+            recentEl.textContent = `⏰ 最近的纪念日：${nearest.name} 还有 ${diff} 天！`;
+        } else {
+            recentEl.style.display = 'none';
+        }
+    }
 }
 
 // ==========================
@@ -625,23 +991,34 @@ function addPhotoUrl() {
     renderPhotos();
 }
 
-function uploadPhoto(input) {
+function compressImage(file, maxWidth = 1200, quality = 0.8) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width, h = img.height;
+            if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = URL.createObjectURL(file);
+    });
+}
+
+async function uploadPhoto(input) {
     const file = input.files[0];
     if (!file) return;
-    // 限制base64数量
     const base64Count = data.photos.filter(p => p.type === 'base64').length;
-    if (base64Count >= 3) {
-        alert('本地图片最多存3张哦~建议用微博/小红书传图后贴链接，这样无限制！');
+    if (base64Count >= 20) {
+        alert('本地图片最多存20张哦~建议用微博/小红书传图后贴链接，这样无限制！');
         input.value = '';
         return;
     }
-    const reader = new FileReader();
-    reader.onload = e => {
-        data.photos.push({ id: Date.now().toString(), type: 'base64', src: e.target.result, date: new Date().toISOString().split('T')[0] });
-        saveData();
-        renderPhotos();
-    };
-    reader.readAsDataURL(file);
+    const compressed = await compressImage(file);
+    data.photos.push({ id: Date.now().toString(), type: 'base64', src: compressed, date: new Date().toISOString().split('T')[0] });
+    saveData();
+    renderPhotos();
     input.value = '';
 }
 
@@ -763,9 +1140,27 @@ function renderCalendar() {
         if (d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
             el.classList.add('today');
         }
-        if (eventDates.has(d)) {
+        const dayEvents = [];
+        data.anniversaries.forEach(a => {
+            let ad = new Date(a.date);
+            if (a.repeat) {
+                const next = getNextAnniversaryDate(a);
+                ad = next;
+            }
+            if (ad.getMonth() === currentMonth && ad.getDate() === d) {
+                dayEvents.push({ icon: a.category || '🎉', name: a.name });
+            }
+        });
+        data.dailies.forEach(daily => {
+            const dd = new Date(daily.date);
+            if (dd.getMonth() === currentMonth && dd.getDate() === d) {
+                dayEvents.push({ icon: '📝', name: daily.content });
+            }
+        });
+        if (dayEvents.length > 0) {
             el.classList.add('has-event');
-            el.innerHTML = `${d}<span class="dot"></span>`;
+            const first = dayEvents[0];
+            el.innerHTML = `${d}<div class="cal-event">${first.icon}${first.name.substring(0,4)}</div>`;
         } else {
             el.textContent = d;
         }
@@ -780,31 +1175,6 @@ function renderCalendar() {
 function updatePassword() {
     data.password = document.getElementById('set-password').value;
     saveData();
-}
-
-function updateMusic() {
-    data.musicUrl = document.getElementById('music-url').value;
-    saveData();
-    setupMusic();
-}
-
-function setupMusic() {
-    const audio = document.getElementById('bg-music');
-    if (data.musicUrl) {
-        audio.src = data.musicUrl;
-    }
-}
-
-function toggleMusic() {
-    const audio = document.getElementById('bg-music');
-    if (!audio.src) { alert('请先输入音乐链接'); return; }
-    if (audio.paused) {
-        audio.play().catch(() => alert('音乐无法播放，请检查链接'));
-        document.getElementById('music-btn').textContent = '⏸ 暂停';
-    } else {
-        audio.pause();
-        document.getElementById('music-btn').textContent = '🎵 播放';
-    }
 }
 
 // ==========================
@@ -832,6 +1202,10 @@ setTimeout(() => {
         }
     });
 }, 500);
+
+// 定期更新在线状态
+setInterval(updateOnlineStatus, 60000);
+setInterval(() => { data.lastActive = Date.now(); saveData(); }, 120000);
 
 // ==========================
 // 底部 Tab 切换
