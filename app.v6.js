@@ -923,30 +923,42 @@ function renderAnniversaries() {
     sorted.forEach(anni => {
         const target = getNextAnniversaryDate(anni);
         const diff = Math.ceil((target - today) / 86400000);
+        // 跳过已过去且不再重复的纪念日
+        if (diff < 0 && !anni.repeat) return;
         let label = '', display = diff;
         if (diff === 0) { label = '就是今天！🎉'; display = '🎉'; }
-        else if (diff < 0) { label = '已过去'; display = Math.abs(diff); }
         else { label = '还有'; }
         const lunarTag = anni.isLunar ? ' 农历' : '';
         const repeatTag = anni.repeat ? ' 每年' : '';
-        const isPast = diff < 0 && !anni.repeat;
         const div = document.createElement('div');
         div.className = 'card-item';
         div.innerHTML = `
             <div class="card-item-info"><h3>${anni.category || '🎉'} ${anni.name}</h3><p>${anni.date}${lunarTag}${repeatTag}</p></div>
-            <div class="card-item-meta ${isPast ? 'past' : ''}"><div class="days">${display}</div><div class="label">${diff === 0 ? '就是今天' : label + '天'}</div></div>
+            <div class="card-item-meta"><div class="days">${display}</div><div class="label">${diff === 0 ? '就是今天' : label + '天'}</div></div>
             <button class="delete-btn" onclick="deleteAnniversary('${anni.id}')">删除</button>`;
         list.appendChild(div);
     });
-    // 首页显示最近纪念日
+    // 如果列表为空，显示提示
+    if (list.children.length === 0) {
+        list.innerHTML = '<div class="empty-state">还没有即将到来的纪念日，快去添加吧 💕</div>';
+    }
+    // 首页显示最近纪念日（只显示未来的）
     const recentEl = document.getElementById('recent-anniversary');
-    if (recentEl && sorted.length > 0) {
-        const nearest = sorted[0];
-        const target = getNextAnniversaryDate(nearest);
-        const diff = Math.ceil((target - new Date().setHours(0,0,0,0)) / 86400000);
-        if (diff <= 30) {
-            recentEl.style.display = 'block';
-            recentEl.textContent = `⏰ 最近的纪念日：${nearest.name} 还有 ${diff} 天！`;
+    if (recentEl) {
+        const future = sorted.find(anni => {
+            const t = getNextAnniversaryDate(anni);
+            const d = Math.ceil((t - today) / 86400000);
+            return d >= 0;
+        });
+        if (future) {
+            const target = getNextAnniversaryDate(future);
+            const diff = Math.ceil((target - today) / 86400000);
+            if (diff <= 30) {
+                recentEl.style.display = 'block';
+                recentEl.textContent = `⏰ 最近的纪念日：${future.name} 还有 ${diff} 天！`;
+            } else {
+                recentEl.style.display = 'none';
+            }
         } else {
             recentEl.style.display = 'none';
         }
