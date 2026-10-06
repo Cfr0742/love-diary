@@ -790,3 +790,28 @@ setTimeout(() => {
         }
     });
 }, 500);
+
+// ==========================
+// 底部 Tab 切换
+// ==========================
+
+function switchTab(tabName, element) {
+    // 隐藏所有 tab-page
+    document.querySelectorAll('.tab-page').forEach(page => {
+        page.classList.remove('active');
+    });
+    // 显示目标 tab-page
+    const target = document.getElementById('tab-' + tabName);
+    if (target) target.classList.add('active');
+
+    // 更新底部导航高亮
+    document.querySelectorAll('.tab-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    if (element) element.classList.add('active');
+
+    // 切换到我的页面时，重新渲染日历
+    if (tabName === 'profile') {
+        renderCalendar();
+    }
+}
