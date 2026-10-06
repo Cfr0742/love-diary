@@ -5,9 +5,17 @@
 const GITEE_TOKEN = "7f5d25c730457bcb5d8f2349dd7d7294";
 const GITEE_REPO = "love-diary";
 const GITEE_FILE = "data.json";
+const GITEE_BRANCH = "master";
 let giteeUser = null;
 let syncStatus = "idle";
 let syncTimer = null;
+let lastError = "";
+
+function base64Encode(str) {
+    const bytes = new TextEncoder().encode(str);
+    const binString = Array.from(bytes, (b) => String.fromCharCode(b)).join("");
+    return btoa(binString);
+}
 
 async function getGiteeUser() {
     if (giteeUser) return giteeUser;
@@ -32,11 +40,11 @@ async function loadFromCloud() {
     const user = await getGiteeUser();
     if (!user) return false;
     try {
-        const rawUrl = `https://gitee.com/${user}/${GITEE_REPO}/raw/master/${GITEE_FILE}?t=${Date.now()}`;
+        const rawUrl = `https://gitee.com/${user}/${GITEE_REPO}/raw/${GITEE_BRANCH}/${GITEE_FILE}?t=${Date.now()}`;
         const res = await fetch(rawUrl, { cache: "no-cache" });
         if (res.ok) {
             const text = await res.text();
-            if (!text.trim()) return false;
+            if (!text.trim() || text.trim() === "{}") return false;
             const cloudData = JSON.parse(text);
             Object.assign(data, cloudData);
             localStorage.setItem("loveDataV2", JSON.stringify(data));
@@ -50,21 +58,30 @@ async function loadFromCloud() {
 
 async function saveToCloud() {
     const user = await getGiteeUser();
-    if (!user) return;
+    if (!user) {
+        lastError = "无法获取用户信息";
+        syncStatus = "error";
+        showSyncStatus();
+        return;
+    }
     syncStatus = "syncing";
     showSyncStatus();
     try {
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+        const content = base64Encode(JSON.stringify(data));
         let sha = null;
-        const getRes = await fetch(`https://gitee.com/api/v5/repos/${user}/${GITEE_REPO}/contents/${GITEE_FILE}?ref=master`, {
+        const getRes = await fetch(`https://gitee.com/api/v5/repos/${user}/${GITEE_REPO}/contents/${GITEE_FILE}?ref=${GITEE_BRANCH}`, {
             headers: { "Authorization": `token ${GITEE_TOKEN}` }
         });
         if (getRes.ok) {
             const fileInfo = await getRes.json();
             sha = fileInfo.sha;
+        } else if (getRes.status !== 404) {
+            lastError = `获取文件信息失败(${getRes.status})`;
         }
-        const body = { message: "update love data", content: content, branch: "master" };
+
+        const body = { message: "update love data", content: content, branch: GITEE_BRANCH };
         if (sha) body.sha = sha;
+
         const putRes = await fetch(`https://gitee.com/api/v5/repos/${user}/${GITEE_REPO}/contents/${GITEE_FILE}`, {
             method: "PUT",
             headers: {
@@ -75,13 +92,17 @@ async function saveToCloud() {
         });
         if (putRes.ok) {
             syncStatus = "success";
+            lastError = "";
         } else {
+            const errText = await putRes.text();
+            lastError = `保存失败(${putRes.status})`;
+            console.error("保存到云端失败", putRes.status, errText);
             syncStatus = "error";
-            console.error("保存到云端失败", await putRes.text());
         }
     } catch (e) {
-        syncStatus = "error";
+        lastError = "网络请求出错";
         console.error("保存到云端出错", e);
+        syncStatus = "error";
     }
     showSyncStatus();
     if (syncStatus === "success") {
