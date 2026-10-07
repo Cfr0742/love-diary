@@ -6,11 +6,11 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>?? ���ǵļ����</title>
+    <title>💕 我们的纪念册</title>
     <link rel="stylesheet" href="style.css?v=5">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.2.0/lunar.min.js"></script>
     <script>
-    // ǿ�Ʒ����棺ȷ���������ǻ�ȡ���´���
+    // 强制防缓存：确保对象总是获取最新代码
     (function() {
         var url = new URL(location.href);
         if (!url.searchParams.get('v')) {
@@ -22,146 +22,146 @@
 </head>
 <body>
 
-<!-- ========== ����ҳ�����Ӱ��ģ� ========== -->
+<!-- ========== 封面页（粒子爱心） ========== -->
 <div id="cover-screen" class="screen active">
     <canvas id="heart-canvas"></canvas>
     <div class="cover-content">
-        <h1 id="cover-title" contenteditable="true">?? ���ǵļ����</h1>
-        <p class="cover-subtitle">�����������޸�����Ŷ~</p>
-        <button class="enter-btn" onclick="enterMain()">? �������ǵļ���� ?</button>
+        <h1 id="cover-title" contenteditable="true">💕 我们的纪念册</h1>
+        <p class="cover-subtitle">点击标题可以修改文字哦~</p>
+        <button class="enter-btn" onclick="enterMain()">✨ 进入我们的纪念册 ✨</button>
     </div>
 </div>
 
-<!-- ========== ����ҳ ========== -->
+<!-- ========== 密码页 ========== -->
 <div id="password-screen" class="screen">
     <div class="password-box">
-        <h2>?? �����������ǵ�С����</h2>
-        <input type="password" id="password-input" placeholder="����������">
-        <button onclick="checkPassword()">����</button>
-        <p class="hint">�������룿�����������ݼ���~</p>
+        <h2>🔒 这是属于我们的小秘密</h2>
+        <input type="password" id="password-input" placeholder="请输入密码">
+        <button onclick="checkPassword()">进入</button>
+        <p class="hint">忘记密码？清除浏览器数据即可~</p>
     </div>
 </div>
 
-<!-- ========== ��ҳ�棨΢��Tab��� ========== -->
+<!-- ========== 主页面（微信Tab风格） ========== -->
 <div id="main-screen" class="screen">
 
-    <!-- Tab ������ -->
+    <!-- Tab 内容区 -->
     <div class="tab-content">
 
-        <!-- Tab 1: ��ҳ -->
+        <!-- Tab 1: 首页 -->
         <div class="tab-page active" id="tab-home">
             <header class="main-header">
-                <h1 id="main-title" contenteditable="true">?? ���ǵļ����</h1>
-                <p id="opening-words" contenteditable="true">�������ǵĹ��£��Ӵ˿̿�ʼ��¼...</p>
+                <h1 id="main-title" contenteditable="true">💕 我们的纪念册</h1>
+                <p id="opening-words" contenteditable="true">这是我们的故事，从此刻开始记录...</p>
                 <div class="together-badge">
-                    <div id="together-timer">������һ���Ѿ� <span id="together-days">0</span> ����</div>
+                    <div id="together-timer">我们在一起已经 <span id="together-days">0</span> 天啦</div>
                     <div id="nearest-anni" style="font-size:0.85em;margin-top:4px;opacity:0.9;font-weight:500;"></div>
-                    <button class="small-btn" onclick="showDateEditor()">?? �޸���ʼ����</button>
+                    <button class="small-btn" onclick="showDateEditor()">📅 修改起始日期</button>
                 </div>
                 <div id="date-editor" style="display:none;margin-top:10px;">
                     <input type="date" id="home-start-date">
-                    <button onclick="updateStartDateFromHome()">ȷ��</button>
-                    <button onclick="hideDateEditor()">ȡ��</button>
+                    <button onclick="updateStartDateFromHome()">确认</button>
+                    <button onclick="hideDateEditor()">取消</button>
                 </div>
             </header>
             <section class="album-card">
-                <h2>?? �����̬</h2>
+                <h2>📌 最近动态</h2>
                 <div id="recent-activity" class="recent-list"></div>
             </section>
 
             <section class="album-card">
-                <h2>?? ������</h2>
+                <h2>🎂 纪念日</h2>
                 <div id="recent-anniversary" class="recent-badge" style="display:none;"></div>
                 <div class="input-row">
-                    <input type="text" id="anni-name" placeholder="����������">
+                    <input type="text" id="anni-name" placeholder="纪念日名称">
                     <input type="date" id="anni-date">
                     <select id="anni-category">
-                        <option value="??">?? ����</option>
-                        <option value="??">?? ����</option>
-                        <option value="??">?? ���</option>
-                        <option value="??">?? ����</option>
-                        <option value="??">?? ����</option>
+                        <option value="🎂">🎂 生日</option>
+                        <option value="💕">💕 恋爱</option>
+                        <option value="💍">💍 结婚</option>
+                        <option value="✈️">✈️ 旅行</option>
+                        <option value="🎉">🎉 其他</option>
                     </select>
                     <label style="display:flex;align-items:center;gap:4px;white-space:nowrap;">
-                        <input type="checkbox" id="anni-repeat" checked> ÿ���ظ�
+                        <input type="checkbox" id="anni-repeat" checked> 每年重复
                     </label>
                     <label style="display:flex;align-items:center;gap:4px;white-space:nowrap;">
-                        <input type="checkbox" id="anni-lunar"> ũ��
+                        <input type="checkbox" id="anni-lunar"> 农历
                     </label>
-                    <button onclick="addAnniversary()">���</button>
+                    <button onclick="addAnniversary()">添加</button>
                 </div>
                 <div id="anniversary-list" class="card-list"></div>
             </section>
         </div>
 
-        <!-- Tab 2: �ճ� -->
+        <!-- Tab 2: 日常 -->
         <div class="tab-page" id="tab-daily">
             <section class="album-card">
-                <h2>?? �����ճ�</h2>
+                <h2>📝 情侣日常</h2>
                 <div class="input-row">
                     <input type="date" id="daily-date">
-                    <input type="text" id="daily-content" placeholder="����һ������ʲô��">
+                    <input type="text" id="daily-content" placeholder="今天一起做了什么？">
                     <select id="daily-mood">
-                        <option value="??">?? ����</option>
-                        <option value="??">?? ����</option>
-                        <option value="??">?? �Ҹ�</option>
-                        <option value="??">?? ��</option>
-                        <option value="??">?? ��ů</option>
-                        <option value="??">?? �ó�</option>
-                        <option value="??">?? ��ף</option>
+                        <option value="😊">😊 开心</option>
+                        <option value="😘">😘 甜蜜</option>
+                        <option value="🥰">🥰 幸福</option>
+                        <option value="😎">😎 酷</option>
+                        <option value="🤗">🤗 温暖</option>
+                        <option value="😋">😋 好吃</option>
+                        <option value="🥳">🥳 庆祝</option>
                     </select>
-                    <button onclick="addDaily()">��¼</button>
+                    <button onclick="addDaily()">记录</button>
                 </div>
                 <div id="daily-list" class="card-list timeline"></div>
             </section>
         </div>
 
-        <!-- Tab 3: ��� -->
+        <!-- Tab 3: 相册 -->
         <div class="tab-page" id="tab-photos">
             <section class="album-card">
-                <h2>?? ��Ƭǽ</h2>
+                <h2>📷 照片墙</h2>
                 <div class="input-row">
-                    <input type="text" id="photo-url" placeholder="ճ��ͼƬ���ӣ������Ҳ��ϴ���">
+                    <input type="text" id="photo-url" placeholder="粘贴图片链接（或点击右侧上传）">
                     <input type="file" id="photo-file" accept="image/*" onchange="uploadPhoto(this)">
-                    <button onclick="document.getElementById('photo-file').click()">?? �ϴ�����ͼ</button>
-                    <button onclick="addPhotoUrl()">�������</button>
+                    <button onclick="document.getElementById('photo-file').click()">📁 上传本地图</button>
+                    <button onclick="addPhotoUrl()">添加链接</button>
                 </div>
-                <p class="tip">?? ����ͼ���Զ�ѹ���洢��Ҳ��ճ���ⲿͼƬ���ӣ����������ţ�</p>
+                <p class="tip">💡 本地图会自动压缩存储，也可粘贴外部图片链接（真正无限张）</p>
                 <div id="photo-grid" class="photo-grid"></div>
             </section>
         </div>
 
-        <!-- Tab 4: ��Ϣ -->
+        <!-- Tab 4: 消息 -->
         <div class="tab-page" id="tab-messages">
             <section class="album-card">
-                <h2>?? ���Ļ�</h2>
+                <h2>💌 悄悄话</h2>
                 <div class="input-row">
-                    <input type="text" id="msg-author" placeholder="�������磺������">
-                    <input type="text" id="msg-content" placeholder="���TA˵��ʲô...">
-                    <button onclick="addMessage()">����</button>
+                    <input type="text" id="msg-author" placeholder="署名（如：宝贝）">
+                    <input type="text" id="msg-content" placeholder="想对TA说点什么...">
+                    <button onclick="addMessage()">留言</button>
                 </div>
                 <div id="message-list" class="card-list message-list"></div>
             </section>
         </div>
 
-        <!-- Tab 5: �ҵ� -->
+        <!-- Tab 5: 我的 -->
         <div class="tab-page" id="tab-profile">
             <section class="album-card">
-                <h2>?? ��������</h2>
+                <h2>📅 恋爱日历</h2>
                 <div class="calendar-nav">
-                    <button onclick="changeMonth(-1)">?</button>
-                    <span id="calendar-title">2024��1��</span>
-                    <button onclick="changeMonth(1)">?</button>
+                    <button onclick="changeMonth(-1)">◀</button>
+                    <span id="calendar-title">2024年1月</span>
+                    <button onclick="changeMonth(1)">▶</button>
                 </div>
                 <div class="calendar-grid" id="calendar-grid"></div>
             </section>
             <section class="album-card settings-card">
-                <h2>?? һ������</h2>
+                <h2>🎵 一起听歌</h2>
                 <div id="music-player">
                     <div class="now-playing">
-                        <div class="vinyl-disc" id="vinyl">??</div>
+                        <div class="vinyl-disc" id="vinyl">💿</div>
                         <div class="song-info">
-                            <div id="now-song-name">ѡ��һ�׸�</div>
+                            <div id="now-song-name">选择一首歌</div>
                             <div id="now-song-artist">-</div>
                             <div id="ta-listening" class="ta-tip"></div>
                         </div>
@@ -172,55 +172,55 @@
                         <span id="total-time">0:00</span>
                     </div>
                     <div class="music-controls">
-                        <button onclick="prevSong()">?</button>
-                        <button onclick="togglePlay()" id="play-btn">??</button>
-                        <button onclick="nextSong()">?</button>
-                        <button onclick="toggleMute()" id="mute-btn">??</button>
+                        <button onclick="prevSong()">⏮</button>
+                        <button onclick="togglePlay()" id="play-btn">▶️</button>
+                        <button onclick="nextSong()">⏭</button>
+                        <button onclick="toggleMute()" id="mute-btn">🔊</button>
                     </div>
                     <input type="range" id="volume-slider" min="0" max="100" value="50" oninput="setVolume(this.value)">
                     <div class="playlist" id="playlist"></div>
                     <div class="music-tip">
-                        ?? ������Ӳ���ʧ�ܣ�����<a href="https://music.liuzhijin.cn/" target="_blank">����������������ȡֱ��</a>���򴫱�����Ƶ
+                        💡 如果链接播放失败，可以<a href="https://music.liuzhijin.cn/" target="_blank">点这里搜索歌曲获取直链</a>，或传本地音频
                     </div>
                     <div class="input-row" style="margin-top:10px;">
-                        <input type="text" id="custom-song-url" placeholder="ճ������ֱ��">
-                        <input type="text" id="custom-song-name" placeholder="����">
-                        <button onclick="addCustomSong()">���</button>
+                        <input type="text" id="custom-song-url" placeholder="粘贴音乐直链">
+                        <input type="text" id="custom-song-name" placeholder="歌名">
+                        <button onclick="addCustomSong()">添加</button>
                     </div>
                     <div class="input-row">
                         <input type="file" id="local-song-file" accept="audio/*" onchange="uploadLocalSong(this)">
-                        <button onclick="document.getElementById('local-song-file').click()">?? �ϴ�������Ƶ</button>
-                        <span style="font-size:0.8rem;color:#bbb;align-self:center;">����1������Ƭ��</span>
+                        <button onclick="document.getElementById('local-song-file').click()">📁 上传本地音频</button>
+                        <span style="font-size:0.8rem;color:#bbb;align-self:center;">建议1分钟内片段</span>
                     </div>
                 </div>
             </section>
 
             <section class="album-card settings-card">
-                <h2>?? ���� & ����</h2>
+                <h2>⚙️ 设置 & 分享</h2>
                 <div class="setting-item">
-                    <label>��һ����ʼ���ڣ�</label>
-                    <input type="text" id="start-date" placeholder="���磺2004-05-20" onchange="updateStartDate()">
+                    <label>在一起起始日期：</label>
+                    <input type="text" id="start-date" placeholder="例如：2004-05-20" onchange="updateStartDate()">
                 </div>
                 <div class="setting-item">
-                    <label>ҳ�����루�������Ҫ����</label>
-                    <input type="text" id="set-password" placeholder="��������" onchange="updatePassword()">
+                    <label>页面密码（留空则不需要）：</label>
+                    <input type="text" id="set-password" placeholder="设置密码" onchange="updatePassword()">
                 </div>
                 <div class="setting-item">
-                    <label>������ɫ��</label>
+                    <label>主题颜色：</label>
                     <div class="theme-selector">
-                        <button onclick="switchTheme('pink')" class="theme-btn theme-pink" title="��ɫ">??</button>
-                        <button onclick="switchTheme('blue')" class="theme-btn theme-blue" title="��ɫ">??</button>
-                        <button onclick="switchTheme('purple')" class="theme-btn theme-purple" title="��ɫ">??</button>
+                        <button onclick="switchTheme('pink')" class="theme-btn theme-pink" title="粉色">💗</button>
+                        <button onclick="switchTheme('blue')" class="theme-btn theme-blue" title="蓝色">💙</button>
+                        <button onclick="switchTheme('purple')" class="theme-btn theme-purple" title="紫色">💜</button>
                     </div>
                 </div>
                 <div class="setting-item">
-                    <button onclick="exportData()" class="share-btn">?? �������ݱ���</button>
+                    <button onclick="exportData()" class="share-btn">📥 导出数据备份</button>
                     <input type="file" id="import-file" accept=".json" onchange="importData(this)" style="display:none;">
-                    <button onclick="document.getElementById('import-file').click()" class="share-btn" style="margin-top:8px;background:linear-gradient(135deg,#81c784,#66bb6a);">?? �������ݻָ�</button>
+                    <button onclick="document.getElementById('import-file').click()" class="share-btn" style="margin-top:8px;background:linear-gradient(135deg,#81c784,#66bb6a);">📤 导入数据恢复</button>
                 </div>
                 <div class="setting-item share-box">
-                    <button onclick="generateShareLink()" class="share-btn">?? ���ɷ������ӷ���TA</button>
-                    <input type="text" id="share-link" readonly placeholder="�����ť��������">
+                    <button onclick="generateShareLink()" class="share-btn">🔗 生成分享链接发给TA</button>
+                    <input type="text" id="share-link" readonly placeholder="点击按钮生成链接">
                 </div>
                 <div id="online-status" class="online-badge"></div>
             </section>
@@ -228,32 +228,32 @@
 
     </div>
 
-    <!-- �ײ����� -->
+    <!-- 底部导航 -->
     <nav class="bottom-tab-bar">
         <div class="tab-item active" onclick="switchTab('home', this)">
-            <span class="tab-icon">??</span>
-            <span class="tab-text">��ҳ</span>
+            <span class="tab-icon">🏠</span>
+            <span class="tab-text">首页</span>
         </div>
         <div class="tab-item" onclick="switchTab('daily', this)">
-            <span class="tab-icon">??</span>
-            <span class="tab-text">�ճ�</span>
+            <span class="tab-icon">📝</span>
+            <span class="tab-text">日常</span>
         </div>
         <div class="tab-item" onclick="switchTab('photos', this)">
-            <span class="tab-icon">??</span>
-            <span class="tab-text">���</span>
+            <span class="tab-icon">📷</span>
+            <span class="tab-text">相册</span>
         </div>
         <div class="tab-item" onclick="switchTab('messages', this)">
-            <span class="tab-icon">??</span>
-            <span class="tab-text">��Ϣ</span>
+            <span class="tab-icon">💌</span>
+            <span class="tab-text">消息</span>
         </div>
         <div class="tab-item" onclick="switchTab('profile', this)">
-            <span class="tab-icon">??</span>
-            <span class="tab-text">�ҵ�</span>
+            <span class="tab-icon">⚙️</span>
+            <span class="tab-text">我的</span>
         </div>
     </nav>
 
 </div>
 
-<script src="app.v6.js?v=11"></script>
+<script src="app.v6.js?v=12"></script>
 </body>
 </html>
