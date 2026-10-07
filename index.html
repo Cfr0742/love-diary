@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -180,7 +180,7 @@
                     <input type="range" id="volume-slider" min="0" max="100" value="50" oninput="setVolume(this.value)">
                     <div class="playlist" id="playlist"></div>
                     <div class="music-tip">
-                        💡 外部音乐链接容易失效，推荐直接上传本地音频（支持MP3，2MB以内）
+                        💡 外部音乐链接容易失效，推荐直接上传本地音频（支持MP3等格式，大文件会自动压缩）
                     </div>
                     <div class="input-row" style="margin-top:10px;">
                         <input type="text" id="custom-song-url" placeholder="粘贴音乐直链">
@@ -190,7 +190,7 @@
                     <div class="input-row">
                         <input type="file" id="local-song-file" accept="audio/*" onchange="uploadLocalSong(this)">
                         <button onclick="document.getElementById('local-song-file').click()">📁 上传本地音频</button>
-                        <span style="font-size:0.8rem;color:#bbb;align-self:center;">建议1分钟内片段</span>
+                        <span style="font-size:0.8rem;color:#bbb;align-self:center;">建议5分钟以内，大文件自动压缩</span>
                     </div>
                 </div>
             </section>
@@ -254,7 +254,7 @@
 
 </div>
 
-<script src="app.v7.js?v=2"></script>
+<script src="app.v7.js?v=4"></script>
 </body>
 </html>
 
