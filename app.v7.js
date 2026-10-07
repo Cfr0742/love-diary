@@ -91,6 +91,25 @@ function showDebugError(msg, isSuccess) {
     }
 }
 
+function showStatus(msg, autoHideMs) {
+    let el = document.getElementById("status-toast");
+    if (!el) {
+        el = document.createElement("div");
+        el.id = "status-toast";
+        el.style.cssText = "position:fixed;top:10px;left:10px;right:10px;padding:12px;border-radius:8px;font-size:14px;z-index:10000;background:rgba(0,0,0,0.8);color:white;word-break:break-all;text-align:center;";
+        document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.style.display = 'block';
+    if (autoHideMs) {
+        setTimeout(() => { if (el) el.style.display = 'none'; }, autoHideMs);
+    }
+}
+function hideStatus() {
+    const el = document.getElementById("status-toast");
+    if (el) el.style.display = 'none';
+}
+
 async function saveToCloud() {
     const user = giteeUser || await getGiteeUser();
     if (!user) {
@@ -290,6 +309,7 @@ async function compressAudio(file) {
         const chunks = [];
         recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
         recorder.onstop = () => {
+            stream.getTracks().forEach(t => t.stop());
             const blob = new Blob(chunks, { type: mimeType });
             const reader = new FileReader();
             reader.onloadend = () => resolve(reader.result);
@@ -305,6 +325,7 @@ async function compressAudio(file) {
             if (recorder.state === 'recording') recorder.stop();
             audio.pause();
             URL.revokeObjectURL(url);
+            stream.getTracks().forEach(t => t.stop());
         };
 
         // 最多录制5分钟
@@ -313,11 +334,13 @@ async function compressAudio(file) {
                 recorder.stop();
                 audio.pause();
                 URL.revokeObjectURL(url);
+                stream.getTracks().forEach(t => t.stop());
             }
         }, 5 * 60 * 1000);
 
         audio.onerror = () => {
             URL.revokeObjectURL(url);
+            stream.getTracks().forEach(t => t.stop());
             reject(new Error('音频解码失败'));
         };
     });
@@ -436,43 +459,53 @@ async function uploadLocalSong(input) {
     const file = input.files[0];
     if (!file) return;
 
-    let base64;
-    const MB2 = 2 * 1024 * 1024;
-    const MB5 = 5 * 1024 * 1024;
+    showStatus('⏳ 正在处理音频，请稍候...');
 
-    if (file.size < MB2) {
-        base64 = await readFileAsBase64(file);
-    } else {
-        try {
-            base64 = await compressAudio(file);
-        } catch (e) {
-            if (file.size < MB5) {
-                if (confirm('浏览器不支持自动压缩，将直接上传原文件（' + (file.size / 1024 / 1024).toFixed(1) + 'MB），可能占用较多空间，确定吗？')) {
-                    base64 = await readFileAsBase64(file);
+    try {
+        let base64;
+        const MB2 = 2 * 1024 * 1024;
+        const MB5 = 5 * 1024 * 1024;
+
+        if (file.size < MB2) {
+            showStatus('⏳ 正在读取音频（' + (file.size / 1024).toFixed(0) + 'KB）...');
+            base64 = await readFileAsBase64(file);
+        } else {
+            showStatus('⏳ 音频较大（' + (file.size / 1024 / 1024).toFixed(1) + 'MB），正在压缩，可能需要几秒钟...');
+            try {
+                base64 = await compressAudio(file);
+            } catch (e) {
+                if (file.size < MB5) {
+                    hideStatus();
+                    if (confirm('浏览器不支持自动压缩，将直接上传原文件（' + (file.size / 1024 / 1024).toFixed(1) + 'MB），可能占用较多空间，确定吗？')) {
+                        showStatus('⏳ 正在读取音频...');
+                        base64 = await readFileAsBase64(file);
+                    } else {
+                        hideStatus();
+                        input.value = '';
+                        return;
+                    }
                 } else {
-                    input.value = '';
-                    return;
+                    throw new Error('文件太大（超过5MB）且浏览器不支持压缩，请换用 Chrome/Edge 浏览器，或剪辑到更短再试。');
                 }
-            } else {
-                alert('文件太大啦（超过5MB），且浏览器不支持压缩，请换用 Chrome/Edge 浏览器，或剪辑到更短再试。');
-                input.value = '';
-                return;
             }
         }
-    }
 
-    if (!data.music.localSongs) data.music.localSongs = [];
-    data.music.localSongs.push({
-        name: file.name.replace(/\.[^/.]+$/, ''),
-        artist: '本地音乐',
-        url: base64,
-        isLocal: true
-    });
-    saveData();
-    initPlaylist();
-    renderPlaylist();
-    showDebugError('✅ 本地音频已添加！', true);
-    input.value = '';
+        if (!data.music.localSongs) data.music.localSongs = [];
+        data.music.localSongs.push({
+            name: file.name.replace(/\.[^/.]+$/, ''),
+            artist: '本地音乐',
+            url: base64,
+            isLocal: true
+        });
+        saveData();
+        initPlaylist();
+        renderPlaylist();
+        showStatus('✅ 本地音频已添加！', 3000);
+        input.value = '';
+    } catch (err) {
+        showStatus('❌ ' + err.message, 5000);
+        input.value = '';
+    }
 }
 
 function checkPartnerListening() {
