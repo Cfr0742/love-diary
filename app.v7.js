@@ -273,15 +273,74 @@ function deleteSong(idx) {
     updateMusicUI();
 }
 
-async function readFileAsBase64(file) {
-    return new Promise((resolve) => {
+let activeUploadSignal = null;
+
+function cancelUpload() {
+    if (activeUploadSignal && activeUploadSignal.onabort) {
+        activeUploadSignal.onabort();
+    }
+    hideUploadDialog();
+}
+
+function showUploadDialog(name, size) {
+    let dialog = document.getElementById('upload-dialog');
+    if (!dialog) {
+        dialog = document.createElement('div');
+        dialog.id = 'upload-dialog';
+        dialog.innerHTML = `
+            <div class="upload-box">
+                <div class="upload-title" id="upload-title"></div>
+                <div class="upload-meta" id="upload-meta"></div>
+                <div class="upload-info" id="upload-info">准备中...</div>
+                <div class="upload-percent" id="upload-percent">0%</div>
+                <div class="progress-track"><div class="progress-fill" id="upload-fill"></div></div>
+                <button class="cancel-btn" onclick="cancelUpload()">取消上传</button>
+            </div>
+        `;
+        document.body.appendChild(dialog);
+    }
+    document.getElementById('upload-title').textContent = name;
+    document.getElementById('upload-meta').textContent = (size / 1024 / 1024).toFixed(2) + ' MB';
+    document.getElementById('upload-info').textContent = '准备中...';
+    document.getElementById('upload-percent').textContent = '0%';
+    document.getElementById('upload-fill').style.width = '0%';
+    dialog.style.display = 'flex';
+}
+
+function updateUploadProgress(percent, text) {
+    const fill = document.getElementById('upload-fill');
+    const pct = document.getElementById('upload-percent');
+    const info = document.getElementById('upload-info');
+    if (fill) fill.style.width = (percent * 100) + '%';
+    if (pct) pct.textContent = Math.round(percent * 100) + '%';
+    if (info && text) info.textContent = text;
+}
+
+function hideUploadDialog() {
+    const dialog = document.getElementById('upload-dialog');
+    if (dialog) dialog.style.display = 'none';
+}
+
+async function readFileAsBase64(file, { onProgress, signal } = {}) {
+    return new Promise((resolve, reject) => {
         const reader = new FileReader();
+        reader.onprogress = e => {
+            if (e.lengthComputable && onProgress) onProgress(e.loaded / e.total);
+        };
         reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('文件读取失败'));
         reader.readAsDataURL(file);
+
+        if (signal) {
+            signal.onabort = () => {
+                reader.abort();
+                reject(new Error('已取消上传'));
+            };
+        }
     });
 }
 
-async function compressAudio(file) {
+async function compressAudio(file, { onProgress, signal } = {}) {
     return new Promise((resolve, reject) => {
         const audio = new Audio();
         const url = URL.createObjectURL(file);
@@ -301,6 +360,7 @@ async function compressAudio(file) {
         let mimeType = mimeTypes.find(mt => MediaRecorder.isTypeSupported(mt));
         if (!mimeType) {
             URL.revokeObjectURL(url);
+            stream.getTracks().forEach(t => t.stop());
             reject(new Error('浏览器不支持录音格式'));
             return;
         }
@@ -319,6 +379,12 @@ async function compressAudio(file) {
         audio.oncanplay = () => {
             audio.play().catch(() => {});
             recorder.start(100);
+        };
+
+        audio.ontimeupdate = () => {
+            if (audio.duration && onProgress) {
+                onProgress(audio.currentTime / audio.duration);
+            }
         };
 
         audio.onended = () => {
@@ -343,6 +409,16 @@ async function compressAudio(file) {
             stream.getTracks().forEach(t => t.stop());
             reject(new Error('音频解码失败'));
         };
+
+        if (signal) {
+            signal.onabort = () => {
+                if (recorder.state === 'recording') recorder.stop();
+                audio.pause();
+                URL.revokeObjectURL(url);
+                stream.getTracks().forEach(t => t.stop());
+                reject(new Error('已取消上传'));
+            };
+        }
     });
 }
 
@@ -459,7 +535,10 @@ async function uploadLocalSong(input) {
     const file = input.files[0];
     if (!file) return;
 
-    showStatus('⏳ 正在处理音频，请稍候...');
+    const signal = { onabort: null };
+    activeUploadSignal = signal;
+
+    showUploadDialog(file.name, file.size);
 
     try {
         let base64;
@@ -467,22 +546,28 @@ async function uploadLocalSong(input) {
         const MB5 = 5 * 1024 * 1024;
 
         if (file.size < MB2) {
-            showStatus('⏳ 正在读取音频（' + (file.size / 1024).toFixed(0) + 'KB）...');
-            base64 = await readFileAsBase64(file);
+            base64 = await readFileAsBase64(file, {
+                onProgress: p => updateUploadProgress(p, '正在读取...'),
+                signal
+            });
         } else {
-            showStatus('⏳ 音频较大（' + (file.size / 1024 / 1024).toFixed(1) + 'MB），正在压缩，可能需要几秒钟...');
             try {
-                base64 = await compressAudio(file);
+                base64 = await compressAudio(file, {
+                    onProgress: p => updateUploadProgress(p, '正在压缩...'),
+                    signal
+                });
             } catch (e) {
+                if (e.message === '已取消上传') throw e;
                 if (file.size < MB5) {
-                    hideStatus();
+                    hideUploadDialog();
                     if (confirm('浏览器不支持自动压缩，将直接上传原文件（' + (file.size / 1024 / 1024).toFixed(1) + 'MB），可能占用较多空间，确定吗？')) {
-                        showStatus('⏳ 正在读取音频...');
-                        base64 = await readFileAsBase64(file);
+                        showUploadDialog(file.name, file.size);
+                        base64 = await readFileAsBase64(file, {
+                            onProgress: p => updateUploadProgress(p, '正在读取...'),
+                            signal
+                        });
                     } else {
-                        hideStatus();
-                        input.value = '';
-                        return;
+                        throw new Error('已取消上传');
                     }
                 } else {
                     throw new Error('文件太大（超过5MB）且浏览器不支持压缩，请换用 Chrome/Edge 浏览器，或剪辑到更短再试。');
@@ -501,9 +586,15 @@ async function uploadLocalSong(input) {
         initPlaylist();
         renderPlaylist();
         showStatus('✅ 本地音频已添加！', 3000);
-        input.value = '';
     } catch (err) {
-        showStatus('❌ ' + err.message, 5000);
+        if (err.message !== '已取消上传') {
+            showStatus('❌ ' + err.message, 5000);
+        } else {
+            showStatus('已取消上传', 2000);
+        }
+    } finally {
+        activeUploadSignal = null;
+        hideUploadDialog();
         input.value = '';
     }
 }
