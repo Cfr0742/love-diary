@@ -157,16 +157,21 @@ function showSyncStatus() {
     if (!el) {
         el = document.createElement("div");
         el.id = "sync-status";
-        el.style.cssText = "position:fixed;bottom:10px;right:10px;padding:6px 12px;border-radius:20px;font-size:12px;z-index:9999;transition:all 0.3s;pointer-events:none;";
+        el.style.cssText = "position:fixed;bottom:70px;right:10px;padding:6px 12px;border-radius:20px;font-size:12px;z-index:9999;transition:all 0.3s;pointer-events:none;display:none;";
         document.body.appendChild(el);
     }
     const map = {
-        idle: { text: "☁️ 云端同步就绪", color: "#666", bg: "rgba(0,0,0,0.05)" },
+        idle: { text: "", color: "#666", bg: "rgba(0,0,0,0.05)" },
         syncing: { text: "🔄 正在同步...", color: "#0066cc", bg: "rgba(0,102,204,0.1)" },
         success: { text: "✅ 已同步到云端", color: "#009900", bg: "rgba(0,153,0,0.1)" },
         error: { text: "❌ 同步失败，已存本地", color: "#cc0000", bg: "rgba(204,0,0,0.1)" }
     };
     const s = map[syncStatus] || map.idle;
+    if (syncStatus === "idle") {
+        el.style.display = "none";
+        return;
+    }
+    el.style.display = "block";
     el.textContent = s.text;
     el.style.color = s.color;
     el.style.background = s.bg;
