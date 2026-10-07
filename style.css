@@ -941,6 +941,20 @@ input[type="file"] {
     margin-right: 10px;
 }
 
+/* ========== 音乐提示 ========== */
+.music-tip {
+    font-size: 0.8rem;
+    color: #999;
+    background: #f9f9f9;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin: 8px 0;
+}
+.music-tip a {
+    color: var(--primary, #e91e63);
+    text-decoration: underline;
+}
+
 /* ========== 小按钮 ========== */
 .small-btn {
     padding: 6px 14px;
