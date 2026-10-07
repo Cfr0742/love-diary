@@ -194,7 +194,8 @@ let audioPlayer = null;
 let musicTimer = null;
 
 function initPlaylist() {
-    playlist = [...defaultPlaylist];
+    const hidden = (data.music && data.music.hiddenDefaults) ? data.music.hiddenDefaults : [];
+    playlist = defaultPlaylist.filter(s => !hidden.includes(s.name));
     if (data.music && data.music.customSongs) {
         playlist = playlist.concat(data.music.customSongs);
     }
@@ -210,8 +211,7 @@ function renderPlaylist() {
     playlist.forEach((song, idx) => {
         const div = document.createElement('div');
         div.className = 'playlist-item' + (idx === data.music.currentSongIndex ? ' active' : '');
-        const isDefault = idx < defaultPlaylist.length;
-        const delBtn = isDefault ? '' : `<button class="playlist-del" onclick="deleteSong(${idx});event.stopPropagation();" title="删除">×</button>`;
+        const delBtn = `<button class="playlist-del" onclick="deleteSong(${idx});event.stopPropagation();" title="删除">×</button>`;
         div.innerHTML = `<span>${song.name} - ${song.artist}</span><span>${delBtn}${idx === data.music.currentSongIndex && data.music.isPlaying ? ' ▶' : ''}</span>`;
         div.onclick = () => playSong(idx);
         el.appendChild(div);
@@ -220,13 +220,27 @@ function renderPlaylist() {
 
 function deleteSong(idx) {
     if (!confirm('确定从歌单删除这首歌吗？')) return;
-    const customStart = defaultPlaylist.length;
-    const localStart = customStart + (data.music.customSongs ? data.music.customSongs.length : 0);
-    if (idx >= customStart && idx < localStart) {
-        data.music.customSongs.splice(idx - customStart, 1);
-    } else if (idx >= localStart) {
-        data.music.localSongs.splice(idx - localStart, 1);
+    const song = playlist[idx];
+
+    // 检查是否是默认歌单
+    const defaultIdx = defaultPlaylist.findIndex(d => d.name === song.name && d.artist === song.artist);
+    if (defaultIdx >= 0) {
+        if (!data.music.hiddenDefaults) data.music.hiddenDefaults = [];
+        if (!data.music.hiddenDefaults.includes(song.name)) {
+            data.music.hiddenDefaults.push(song.name);
+        }
+    } else {
+        // 检查 customSongs
+        const customIdx = (data.music.customSongs || []).findIndex(c => c.name === song.name && c.url === song.url);
+        if (customIdx >= 0) {
+            data.music.customSongs.splice(customIdx, 1);
+        } else {
+            // localSongs
+            const localIdx = (data.music.localSongs || []).findIndex(l => l.name === song.name && l.url === song.url);
+            if (localIdx >= 0) data.music.localSongs.splice(localIdx, 1);
+        }
     }
+
     if (data.music.currentSongIndex === idx) {
         data.music.currentSongIndex = -1;
         data.music.isPlaying = false;
