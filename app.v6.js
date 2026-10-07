@@ -193,6 +193,9 @@ function initPlaylist() {
     if (data.music && data.music.customSongs) {
         playlist = playlist.concat(data.music.customSongs);
     }
+    if (data.music && data.music.localSongs) {
+        playlist = playlist.concat(data.music.localSongs);
+    }
 }
 
 function renderPlaylist() {
@@ -220,6 +223,11 @@ function playSong(idx) {
     audioPlayer.src = playlist[idx].url;
     audioPlayer.volume = data.music.isMuted ? 0 : (data.music.volume / 100);
     audioPlayer.currentTime = data.music.currentTime || 0;
+    audioPlayer.onerror = () => {
+        showDebugError('❌ 该音乐链接失效，请换一首或上传本地音频');
+        data.music.isPlaying = false;
+        updateMusicUI();
+    };
     audioPlayer.play().catch(() => showDebugError('音乐播放失败，请检查链接'));
     updateMusicUI();
     saveData();
@@ -310,6 +318,33 @@ function addCustomSong() {
     renderPlaylist();
     document.getElementById('custom-song-url').value = '';
     document.getElementById('custom-song-name').value = '';
+}
+
+async function uploadLocalSong(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+        alert('文件太大啦（超过2MB），请剪辑到1分钟以内，或上传外部链接');
+        input.value = '';
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+        const base64 = reader.result;
+        if (!data.music.localSongs) data.music.localSongs = [];
+        data.music.localSongs.push({
+            name: file.name.replace(/\.[^/.]+$/, ''),
+            artist: '本地音乐',
+            url: base64,
+            isLocal: true
+        });
+        saveData();
+        initPlaylist();
+        renderPlaylist();
+        showDebugError('✅ 本地音频已添加！', true);
+        input.value = '';
+    };
+    reader.readAsDataURL(file);
 }
 
 function checkPartnerListening() {
@@ -1190,7 +1225,11 @@ function renderCalendar() {
         if (dayEvents.length > 0) {
             el.classList.add('has-event');
             const first = dayEvents[0];
-            el.innerHTML = `${d}<div class="cal-event">${first.icon}${first.name.substring(0,4)}</div>`;
+            const fullText = first.icon + first.name;
+            let fontSize = '0.65rem';
+            if (fullText.length > 7) fontSize = '0.5rem';
+            else if (fullText.length > 5) fontSize = '0.55rem';
+            el.innerHTML = `${d}<div class="cal-event" style="font-size:${fontSize}">${fullText}</div>`;
         } else {
             el.textContent = d;
         }
