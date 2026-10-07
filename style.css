@@ -993,3 +993,74 @@ input[type="file"] {
     background: var(--primary, #e91e63);
     color: white;
 }
+
+/* ========== 上传进度对话框 ========== */
+#upload-dialog {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.upload-box {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    width: 80%;
+    max-width: 320px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+.upload-title {
+    font-size: 1.05rem;
+    font-weight: bold;
+    color: #444;
+    margin-bottom: 4px;
+    word-break: break-all;
+}
+.upload-meta {
+    font-size: 0.8rem;
+    color: #bbb;
+    margin-bottom: 8px;
+}
+.upload-info {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 4px;
+}
+.upload-percent {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary, #e91e63);
+    margin-bottom: 8px;
+}
+.progress-track {
+    height: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+    margin: 12px 0 16px;
+    overflow: hidden;
+}
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--gradient-start, #ff6b9d), var(--gradient-end, #ff8e8e));
+    transition: width 0.2s;
+    border-radius: 5px;
+}
+.cancel-btn {
+    padding: 8px 24px;
+    font-size: 0.9rem;
+    background: white;
+    border: 1px solid #fce4ec;
+    border-radius: 20px;
+    color: var(--primary, #e91e63);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.cancel-btn:hover {
+    background: var(--primary, #e91e63);
+    color: white;
+}
