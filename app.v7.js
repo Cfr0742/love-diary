@@ -1216,10 +1216,7 @@ function renderCalendar() {
             el.classList.add('has-event');
             const first = dayEvents[0];
             const fullText = first.icon + first.name;
-            let fontSize = '0.65rem';
-            if (fullText.length > 7) fontSize = '0.5rem';
-            else if (fullText.length > 5) fontSize = '0.55rem';
-            el.innerHTML = `${d}<div class="cal-event" style="font-size:${fontSize}">${fullText}</div>`;
+            el.innerHTML = `${d}<div class="cal-event">${fullText}</div>`;
         } else {
             el.textContent = d;
         }
