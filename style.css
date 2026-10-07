@@ -855,6 +855,26 @@ input[type="file"] {
     background: #fff0f5;
     color: var(--primary, #e91e63);
 }
+.playlist-del {
+    background: #ffebee;
+    color: #e53935;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1;
+    margin-right: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+}
+.playlist-del:hover {
+    background: #ef5350;
+    color: white;
+}
 
 /* ========== 日历事件 ========== */
 .cal-event {
