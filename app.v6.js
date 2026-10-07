@@ -1194,10 +1194,6 @@ function renderCalendar() {
         const d = new Date(a.date);
         if (d.getMonth() === currentMonth) eventDates.add(d.getDate());
     });
-    data.dailies.forEach(d => {
-        const dd = new Date(d.date);
-        if (dd.getMonth() === currentMonth) eventDates.add(dd.getDate());
-    });
 
     for (let d = 1; d <= daysInMonth; d++) {
         const el = document.createElement('div');
@@ -1214,12 +1210,6 @@ function renderCalendar() {
             }
             if (ad.getMonth() === currentMonth && ad.getDate() === d) {
                 dayEvents.push({ icon: a.category || '🎉', name: a.name });
-            }
-        });
-        data.dailies.forEach(daily => {
-            const dd = new Date(daily.date);
-            if (dd.getMonth() === currentMonth && dd.getDate() === d) {
-                dayEvents.push({ icon: '📝', name: daily.content });
             }
         });
         if (dayEvents.length > 0) {
