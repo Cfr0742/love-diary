@@ -614,6 +614,205 @@ function checkPartnerListening() {
 }
 
 // ==========================
+// 情侣账号系统
+// ==========================
+
+function getCurrentUser() {
+    if (!data.users || data.users.length === 0) return null;
+    if (!data.currentUser) return null;
+    return data.users.find(u => u.id === data.currentUser) || null;
+}
+
+function showUserSelector() {
+    let dialog = document.getElementById('user-selector');
+    if (!dialog) {
+        dialog = document.createElement('div');
+        dialog.id = 'user-selector';
+        dialog.innerHTML = `
+            <div class="user-selector-box">
+                <h3>💕 你是谁？</h3>
+                <div class="user-cards" id="user-cards"></div>
+                <p class="user-skip" onclick="skipUserLogin()">暂不选择</p>
+            </div>
+        `;
+        document.body.appendChild(dialog);
+    }
+    const cards = document.getElementById('user-cards');
+    cards.innerHTML = '';
+    if (data.users && data.users.length > 0) {
+        data.users.forEach(u => {
+            const div = document.createElement('div');
+            div.className = 'user-card';
+            div.onclick = () => promptUserLogin(u.id);
+            const avatar = u.avatar ? `<img src="${u.avatar}" class="user-avatar-img">` : `<div class="user-avatar-placeholder">${u.name ? u.name[0] : '?'}</div>`;
+            div.innerHTML = `
+                ${avatar}
+                <div class="user-card-name">${u.name || '未命名'}</div>
+            `;
+            cards.appendChild(div);
+        });
+    }
+    dialog.style.display = 'flex';
+}
+
+function promptUserLogin(userId) {
+    const user = data.users.find(u => u.id === userId);
+    if (!user) return;
+    const input = prompt(`请输入 ${user.name || '用户'} 的密码：`);
+    if (input === null) return;
+    if (input === user.password) {
+        data.currentUser = userId;
+        saveData();
+        document.getElementById('user-selector').style.display = 'none';
+        renderUserBadge();
+        showStatus(`欢迎回来，${user.name || '亲爱的'}！`, 3000);
+    } else {
+        alert('密码不对哦~');
+    }
+}
+
+function skipUserLogin() {
+    document.getElementById('user-selector').style.display = 'none';
+}
+
+function logoutUser() {
+    data.currentUser = null;
+    saveData();
+    renderUserBadge();
+    showStatus('已退出登录', 2000);
+}
+
+function renderUserBadge() {
+    let el = document.getElementById('user-badge');
+    const user = getCurrentUser();
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'user-badge';
+        el.style.cssText = 'position:fixed;top:10px;right:10px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.95);padding:6px 12px;border-radius:20px;box-shadow:0 2px 10px rgba(0,0,0,0.1);font-size:0.85rem;cursor:pointer;';
+        el.onclick = () => {
+            if (data.currentUser) {
+                if (confirm('要切换身份吗？')) showUserSelector();
+            } else if (data.users && data.users.length > 0) {
+                showUserSelector();
+            }
+        };
+        document.body.appendChild(el);
+    }
+    if (user) {
+        const avatar = user.avatar ? `<img src="${user.avatar}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">` : `<div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));color:white;display:flex;align-items:center;justify-content:center;font-size:12px;">${user.name ? user.name[0] : '我'}</div>`;
+        el.innerHTML = `${avatar}<span style="color:var(--primary);font-weight:500;">${user.name || '我'}</span>`;
+        el.style.display = 'flex';
+    } else {
+        el.style.display = 'none';
+    }
+}
+
+function initUserSystem() {
+    renderUserBadge();
+    if (data.users && data.users.length > 0 && !data.currentUser) {
+        showUserSelector();
+    }
+}
+
+function renderUserManager() {
+    const el = document.getElementById('user-manager');
+    if (!el) return;
+    if (!data.users) data.users = [];
+    if (data.users.length === 0) {
+        el.innerHTML = `
+            <div class="empty-state" style="padding:16px;color:#bbb;">尚未设置情侣账号<br>添加两个人就可以互相标记身份啦~</div>
+            <div style="display:flex;gap:8px;justify-content:center;">
+                <button class="small-btn" onclick="addUser()">➕ 添加用户1</button>
+                <button class="small-btn" onclick="addUser()">➕ 添加用户2</button>
+            </div>
+        `;
+        return;
+    }
+    el.innerHTML = '';
+    data.users.forEach((u, idx) => {
+        const div = document.createElement('div');
+        div.className = 'user-edit-row';
+        const avatarHtml = u.avatar
+            ? `<img src="${u.avatar}" class="user-edit-avatar" onclick="document.getElementById('avatar-file-${u.id}').click()">`
+            : `<div class="user-edit-avatar-placeholder" onclick="document.getElementById('avatar-file-${u.id}').click()">${u.name ? u.name[0] : '?'}</div>`;
+        div.innerHTML = `
+            <div style="display:flex;align-items:center;gap:10px;flex:1;">
+                ${avatarHtml}
+                <input type="file" id="avatar-file-${u.id}" accept="image/*" style="display:none;" onchange="updateUserAvatar(this,'${u.id}')">
+                <div style="flex:1;min-width:0;">
+                    <input type="text" value="${u.name || ''}" placeholder="昵称" onchange="updateUserName('${u.id}',this.value)" style="width:100%;padding:6px 10px;border:1px solid #fce4ec;border-radius:8px;margin-bottom:4px;font-size:0.9rem;">
+                    <input type="text" value="${u.password || ''}" placeholder="登录密码" onchange="updateUserPassword('${u.id}',this.value)" style="width:100%;padding:6px 10px;border:1px solid #fce4ec;border-radius:8px;font-size:0.9rem;">
+                </div>
+            </div>
+            <button class="playlist-del" onclick="removeUser('${u.id}')" title="删除" style="margin-left:8px;">×</button>
+        `;
+        el.appendChild(div);
+    });
+    if (data.users.length < 2) {
+        const addBtn = document.createElement('button');
+        addBtn.className = 'small-btn';
+        addBtn.style.marginTop = '10px';
+        addBtn.textContent = '➕ 再添加一个用户';
+        addBtn.onclick = addUser;
+        el.appendChild(addBtn);
+    }
+}
+
+function addUser() {
+    if (!data.users) data.users = [];
+    if (data.users.length >= 2) {
+        alert('最多设置两个人哦~');
+        return;
+    }
+    const id = 'user' + (data.users.length + 1);
+    data.users.push({ id, name: data.users.length === 0 ? '我' : 'TA', password: '', avatar: '' });
+    saveData();
+    renderUserManager();
+}
+
+function removeUser(id) {
+    if (!confirm('确定删除这个用户吗？相关的作者标记也会丢失哦。')) return;
+    data.users = data.users.filter(u => u.id !== id);
+    if (data.currentUser === id) data.currentUser = null;
+    saveData();
+    renderUserManager();
+    renderUserBadge();
+}
+
+function updateUserName(id, name) {
+    const u = data.users.find(u => u.id === id);
+    if (u) { u.name = name.trim(); saveData(); renderUserManager(); renderUserBadge(); }
+}
+
+function updateUserPassword(id, pwd) {
+    const u = data.users.find(u => u.id === id);
+    if (u) { u.password = pwd; saveData(); }
+}
+
+async function updateUserAvatar(input, userId) {
+    const file = input.files[0];
+    if (!file) return;
+    const base64 = await readFileAsBase64(file);
+    const u = data.users.find(u => u.id === userId);
+    if (u) { u.avatar = base64; saveData(); renderUserManager(); renderUserBadge(); }
+}
+
+function getUserName(id) {
+    if (!data.users) return '?';
+    const u = data.users.find(u => u.id === id);
+    return u ? (u.name || '?') : '?';
+}
+
+function getUserAvatarHtml(id, size) {
+    size = size || 20;
+    if (!data.users) return '';
+    const u = data.users.find(u => u.id === id);
+    if (!u) return '';
+    if (u.avatar) return `<img src="${u.avatar}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;vertical-align:middle;">`;
+    return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));color:white;display:inline-flex;align-items:center;justify-content:center;font-size:${size*0.5}px;vertical-align:middle;">${u.name ? u.name[0] : '?'}</div>`;
+}
+
+// ==========================
 // 主题切换
 // ==========================
 
@@ -689,11 +888,14 @@ function renderRecentActivity() {
     const el = document.getElementById('recent-activity');
     if (!el) return;
     const items = [];
-    data.anniversaries.slice(-2).forEach(a => items.push({ type: '🎂', text: a.name, time: a.date }));
-    data.dailies.slice(-2).forEach(d => items.push({ type: '📝', text: d.content, time: d.date }));
-    data.messages.slice(-2).forEach(m => items.push({ type: '💌', text: m.content, time: m.date }));
+    data.anniversaries.slice(-2).forEach(a => items.push({ type: '🎂', text: a.name, time: a.date, author: a.author }));
+    data.dailies.slice(-2).forEach(d => items.push({ type: '📝', text: d.content, time: d.date, author: d.author }));
+    data.messages.slice(-2).forEach(m => items.push({ type: '💌', text: m.content, time: m.date, author: m.userId }));
     items.sort((a, b) => new Date(b.time || 0) - new Date(a.time || 0));
-    el.innerHTML = items.slice(0, 5).map(i => `<div class="recent-item"><span>${i.type}</span> <span>${i.text}</span></div>`).join('') || '<div class="empty-state">还没有动态~</div>';
+    el.innerHTML = items.slice(0, 5).map(i => {
+        const authorText = i.author ? ` · ${getUserName(i.author)}` : '';
+        return `<div class="recent-item"><span>${i.type}</span> <span>${i.text}${authorText}</span></div>`;
+    }).join('') || '<div class="empty-state">还没有动态~</div>';
 }
 
 // ==========================
@@ -786,7 +988,9 @@ function loadData() {
         photos: [],
         messages: [],
         music: { currentSongIndex: -1, isPlaying: false, volume: 50, isMuted: false, currentTime: 0 },
-        lastActive: null
+        lastActive: null,
+        users: [],
+        currentUser: null
     };
     return defaults;
 }
@@ -831,6 +1035,7 @@ function enterMain() {
     } else {
         showScreen('main-screen');
         initMain();
+        initUserSystem();
     }
 }
 
@@ -839,6 +1044,7 @@ function checkPassword() {
     if (input === data.password) {
         showScreen('main-screen');
         initMain();
+        initUserSystem();
     } else {
         alert('密码不对哦~再想想？');
     }
@@ -878,6 +1084,7 @@ function initMain() {
     renderCalendar();
     renderRecentActivity();
     updateOnlineStatus();
+    renderUserManager();
 
     // 可编辑元素监听
     document.getElementById('main-title').addEventListener('blur', () => {
@@ -1132,7 +1339,7 @@ function addAnniversary() {
     const repeat = document.getElementById('anni-repeat').checked;
     const isLunar = document.getElementById('anni-lunar').checked;
     if (!name || !date) { alert('请填写完整哦~'); return; }
-    const item = { id: Date.now().toString(), name, date, category: category || '🎉', repeat: !!repeat, isLunar: !!isLunar };
+    const item = { id: Date.now().toString(), name, date, category: category || '🎉', repeat: !!repeat, isLunar: !!isLunar, author: data.currentUser };
     if (isLunar) {
         const lunar = getLunarDate(date);
         if (lunar) item.lunarDate = lunar;
@@ -1222,8 +1429,9 @@ function renderAnniversaries() {
         const rowText = diff === 0
             ? `${anni.category || '🎉'} ${anni.name}，就是今天！🎉`
             : `${anni.category || '🎉'} ${anni.name}，还有 ${diff} 天`;
+        const authorBadge = anni.author ? `&nbsp;·&nbsp;${getUserAvatarHtml(anni.author, 14)}&nbsp;${getUserName(anni.author)}` : '';
         div.innerHTML = `
-            <span class="anni-text">${rowText}</span>
+            <span class="anni-text">${rowText}${authorBadge}</span>
             <button class="delete-btn" onclick="deleteAnniversary('${anni.id}')">删除</button>`;
         list.appendChild(div);
     });
@@ -1263,7 +1471,7 @@ function addDaily() {
     const content = document.getElementById('daily-content').value.trim();
     const mood = document.getElementById('daily-mood').value;
     if (!date || !content) { alert('请填写完整哦~'); return; }
-    data.dailies.push({ id: Date.now().toString(), date, content, mood });
+    data.dailies.push({ id: Date.now().toString(), date, content, mood, author: data.currentUser });
     saveData();
     document.getElementById('daily-content').value = '';
     renderDailies();
@@ -1289,11 +1497,12 @@ function renderDailies() {
     data.dailies.forEach(d => {
         const div = document.createElement('div');
         div.className = 'card-item';
+        const authorBadge = d.author ? `&nbsp;·&nbsp;${getUserAvatarHtml(d.author, 14)}&nbsp;${getUserName(d.author)}` : '';
         div.innerHTML = `
             <div class="card-item-info">
                 <div class="mood">${d.mood}</div>
                 <div class="content">${d.content}</div>
-                <div class="date">${d.date}</div>
+                <div class="date">${d.date}${authorBadge}</div>
             </div>
             <button class="delete-btn" onclick="deleteDaily('${d.id}')">删除</button>`;
         list.appendChild(div);
@@ -1307,7 +1516,7 @@ function renderDailies() {
 function addPhotoUrl() {
     const url = document.getElementById('photo-url').value.trim();
     if (!url) { alert('请输入图片链接'); return; }
-    data.photos.push({ id: Date.now().toString(), type: 'url', src: url, date: new Date().toISOString().split('T')[0] });
+    data.photos.push({ id: Date.now().toString(), type: 'url', src: url, date: new Date().toISOString().split('T')[0], author: data.currentUser });
     saveData();
     document.getElementById('photo-url').value = '';
     renderPhotos();
@@ -1332,7 +1541,7 @@ async function uploadPhoto(input) {
     const file = input.files[0];
     if (!file) return;
     const compressed = await compressImage(file, 800, 0.6);
-    data.photos.push({ id: Date.now().toString(), type: 'base64', src: compressed, date: new Date().toISOString().split('T')[0] });
+    data.photos.push({ id: Date.now().toString(), type: 'base64', src: compressed, date: new Date().toISOString().split('T')[0], author: data.currentUser });
     saveData();
     renderPhotos();
     showDebugError('✅ 照片已自动压缩存储', true);
@@ -1356,9 +1565,10 @@ function renderPhotos() {
     data.photos.forEach(p => {
         const div = document.createElement('div');
         div.className = 'photo-item';
+        const authorBadge = p.author ? ` · ${getUserName(p.author)}` : '';
         div.innerHTML = `
             <img src="${p.src}" alt="photo" onerror="this.parentElement.style.display='none'">
-            <div class="photo-caption">${p.date || ''}</div>
+            <div class="photo-caption">${p.date || ''}${authorBadge}</div>
             <button class="photo-del" onclick="deletePhoto('${p.id}')">×</button>`;
         grid.appendChild(div);
     });
@@ -1372,7 +1582,7 @@ function addMessage() {
     const author = document.getElementById('msg-author').value.trim() || '匿名';
     const content = document.getElementById('msg-content').value.trim();
     if (!content) { alert('写点什么吧~'); return; }
-    data.messages.push({ id: Date.now().toString(), author, content, date: new Date().toLocaleString('zh-CN') });
+    data.messages.push({ id: Date.now().toString(), author, content, date: new Date().toLocaleString('zh-CN'), userId: data.currentUser });
     saveData();
     document.getElementById('msg-content').value = '';
     renderMessages();
@@ -1395,8 +1605,9 @@ function renderMessages() {
     data.messages.slice().reverse().forEach(m => {
         const div = document.createElement('div');
         div.className = 'card-item';
+        const authorAvatar = m.userId ? `${getUserAvatarHtml(m.userId, 16)}&nbsp;` : '';
         div.innerHTML = `
-            <div class="message-header"><span class="message-author">${m.author}</span><span class="message-date">${m.date}</span></div>
+            <div class="message-header"><span class="message-author">${authorAvatar}${m.author}</span><span class="message-date">${m.date}</span></div>
             <div class="message-content">${m.content}</div>
             <button class="delete-btn" style="align-self:flex-end;margin-top:6px;" onclick="deleteMessage('${m.id}')">删除</button>`;
         list.appendChild(div);
