@@ -1067,3 +1067,112 @@ input[type="file"] {
     background: var(--primary, #e91e63);
     color: white;
 }
+
+/* ========== 情侣账号系统 ========== */
+#user-selector {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 20000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+.user-selector-box {
+    background: white;
+    padding: 32px 24px;
+    border-radius: 20px;
+    width: 80%;
+    max-width: 340px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+.user-selector-box h3 {
+    color: var(--primary, #e91e63);
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+}
+.user-cards {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.user-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 16px;
+    background: #fff8fb;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 100px;
+}
+.user-card:hover {
+    border-color: var(--primary-light, #ff4081);
+    transform: translateY(-2px);
+}
+.user-avatar-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.user-avatar-placeholder {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+.user-card-name {
+    font-size: 1rem;
+    color: #444;
+    font-weight: 500;
+}
+.user-skip {
+    font-size: 0.85rem;
+    color: #bbb;
+    cursor: pointer;
+    margin-top: 8px;
+}
+.user-skip:hover {
+    color: var(--primary, #e91e63);
+    text-decoration: underline;
+}
+.user-edit-row {
+    display: flex;
+    align-items: center;
+    background: #fff8fb;
+    border-radius: 14px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.user-edit-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.user-edit-avatar-placeholder {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    flex-shrink: 0;
+}
