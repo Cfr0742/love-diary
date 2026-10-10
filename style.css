@@ -669,6 +669,9 @@ input[type="file"] {
 
 /* ========== 微信风格底部导航 ========== */
 #main-screen {
+    display: none;
+}
+#main-screen.active {
     display: flex;
     flex-direction: column;
     height: 100vh;
